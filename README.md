@@ -55,11 +55,11 @@ Een gebruiksvriendelijke en efficiënte webapplicatie die het plannen en registr
 - Commit directly to main or develop
 - Merge without review or with failing checks
 
-## Team & verantwoordelijkheden
-- **Ryzex** – Web (frontend)  
-- **Tamzid** – Web & Software  
-- **Osama** – Backend & Software  
-- **Lukas** – Backend & Software  
+## Team & Responsibilities
+- [**Ryzex**]() – Web (frontend)  
+- [**Tamzid**]() – Web & Software  
+- [**Osama**]() – Backend & Software  
+- [**Lukas**]() – Backend & Software  
 
 ## Installatie
 1. Clone de repository  
