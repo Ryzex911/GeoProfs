@@ -35,7 +35,7 @@ Een gebruiksvriendelijke en efficiënte webapplicatie die het plannen en registr
 - **Always target develop** (never commit directly to main)
 - **Title:** US001: short title
 - **Description:** what & why + link to Trello card
-- At least 1 review required; all checks must pass
+- At least 2 review required; all checks must pass
 
 ## Commits
 - Written in English. Types: feat, fix, chore, refactor
