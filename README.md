@@ -38,7 +38,7 @@ Een gebruiksvriendelijke en efficiënte webapplicatie die het plannen en registr
 - At least 2 review required; all checks must pass
 
 ## Commits
-- Written in English. Types: feat, fix, chore, refactor
+- Written in English. [Types:](https://www.conventionalcommits.org/en/v1.0.0/) feat, fix, chore, refactor
 - **Format:**
   feat(leave-requests): add approval endpoint (US001)
   Body (optional): details on what changed and impact
