@@ -13,11 +13,11 @@ use Inertia\Response;
 class ConfirmablePasswordController extends Controller
 {
     /**
-     * Show the confirm password page.
+     * Show the confirm password view.
      */
     public function show(): Response
     {
-        return Inertia::render('auth/confirm-password');
+        return Inertia::render('Auth/ConfirmPassword');
     }
 
     /**
