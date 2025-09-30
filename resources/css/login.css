@@ -27,7 +27,7 @@ body{
 .visual__overlay{position:absolute; inset:0; background:linear-gradient(120deg, rgba(14,58,91,.65), rgba(14,58,91,.35), rgba(14,58,91,.15))}
 .visual__brand{position:absolute; top:24px; left:24px; color:#fff; display:flex; gap:10px; align-items:center; font-weight:600}
 .visual .logo{color:#fff}
-
+ra
 /* Card */
 .card{
     width:100%; max-width:520px; margin:0 auto; align-self:center;
