@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -8,25 +7,33 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+public function showLoginForm(): \Illuminate\View\View
+{
+return view('auth.login');
+}
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+public function login(Request $request): \Illuminate\Http\RedirectResponse
+{
+$credentials = $request->validate([
+'email' => 'required|email',
+'password' => 'required',
+]);
 
-            return response()->json([
-                'success' => true,
-                'redirect' => url('/dashboard'),
-            ]);
-        }
+if (Auth::attempt($credentials)) {
+$request->session()->regenerate();
+return redirect()->intended('/');
+}
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Ongeldige inloggegevens',
-        ], 401);
-    }
+return back()->withErrors([
+'email' => 'De ingevoerde gegevens zijn onjuist.',
+]);
+}
+
+public function logout(Request $request): \Illuminate\Http\RedirectResponse
+{
+Auth::logout();
+$request->session()->invalidate();
+$request->session()->regenerateToken();
+return redirect('/login');
+}
 }
