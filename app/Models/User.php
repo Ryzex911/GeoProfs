@@ -7,15 +7,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\CanResetPassword; // Voor wachtwoord reset
 
-class User extends Authenticatable implements CanResetPassword
+class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * De velden die mass-assignable zijn.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'lastname',
@@ -23,22 +18,10 @@ class User extends Authenticatable implements CanResetPassword
         'password',
     ];
 
-    /**
-     * Velden die verborgen moeten blijven bij serialisatie.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    // Mogelijke mutator die wachtwoord automatisch bcrypt
+    public function setPasswordAttribute($value): void
+    {
+        $this->attributes['password'] = bcrypt($value);
+    }
 
-    /**
-     * Velden die automatisch gecast worden.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
 }
