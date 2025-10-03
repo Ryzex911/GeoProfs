@@ -2,11 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('home'); // of je dashboard
-});
+// Always go to login when opening the site
+Route::redirect('/', '/login');
 
-Route::get('/blabla', function () { return view('auth.login'); })->name('login.form');
-Route::get('/reset-password', function () { return view('auth.reset-password'); });
-
-require __DIR__.'/auth.php';
+// Login + Reset views with proper route names
+Route::view('/login', 'auth.login')->name('login');
+Route::view('/reset-password', 'auth.reset-password')->name('password.request');
