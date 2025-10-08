@@ -36,10 +36,15 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        do {
+            $code = rand(100000, 999999);
+        } while (User::where('auth_code', $code)->exists());
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'auth_code' => $code,
         ]);
 
         event(new Registered($user));
