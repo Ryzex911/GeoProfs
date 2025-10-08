@@ -25,3 +25,7 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Laravel Sail local config
+docker-compose.yml
+compose.yaml
