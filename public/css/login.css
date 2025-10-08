@@ -70,3 +70,97 @@ input:focus{border-color:var(--geo-blue); box-shadow:0 0 0 3px rgba(14,58,91,.12
     .card{margin:-40px auto 24px; width:min(94%,520px)}
     .visual__brand{top:16px; left:16px}
 }
+
+/************************2fa pagina styling**************************/
+
+
+.fa-form{
+    display: flex;
+    gap: 2rem;
+    justify-content: center ;
+
+  }
+
+.numbers-2fa{
+    position: relative;
+    top: 50px;
+    width: 60px;
+    height: 60px;
+    gap: 20px;
+    border-radius: 14px;
+    font-size: 32px;
+    text-align: center;
+    line-height: 1;
+    caret-color: #0ea5e9;
+    appearance: textfield;
+
+}
+
+.card-2fa{
+
+    height: 75%; max-width:700px; margin:0 auto; align-self:center; max-height: 400px;
+    background:var(--white); border-radius:16px; padding:32px 28px;
+    box-shadow:0 10px 30px rgba(14,58,91,.08);
+}
+
+.card-2fa-footer{
+
+}
+
+.stuur-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 46px;
+    padding: 0 32px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+
+    background: var(--geo-blue);
+    color: #fff;
+    font-weight: 600;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+
+    box-shadow: 0 8px 16px rgba(14,58,91,.12);
+    transition: transform .04s, filter .15s;
+
+    margin: 80px auto 0;
+    display: block;
+}
+
+.stuur-button:hover {
+    filter: brightness(1.05);
+}
+.stuur-button:active {
+    transform: translateY(1px);
+}
+
+/* Tablet */
+@media (max-width: 768px){
+    .page--auth{ grid-template-columns:1fr; }
+    .visual{ min-height:180px; background-position:center 20%; }
+    .visual__brand{ top:16px; left:16px; }
+    .card-2fa{ margin:-36px auto 24px; }
+}
+
+/* Mobiel */
+@media (max-width: 480px){
+    .fa-form{ gap: clamp(10px, 3.5vw, 18px); }
+    .stuur-button{ margin-top: clamp(80px, 6vw, 32px); }
+    .card__header h1,
+    .card-2fa h1{ font-size: clamp(18px, 6vw, 24px); }
+    .card-2fa-footer{ position: relative ; top: 20px; right: 20px; }
+}
+
+/* Extra klein (iPhone SE / 320–360px) */
+@media (max-width: 360px){
+    .numbers-2fa{
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+    }
+    .fa-form{ gap: 10px; }
+}

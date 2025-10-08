@@ -48,7 +48,7 @@
                 <a class="link" href="{{ route('password.request') }}">Wachtwoord vergeten?</a>            </div>
         </div>
 
-        <button class="btn btn--primary" type="button" onclick="window.location.href='/dashboard'">
+        <button class="btn btn--primary" type="button" onclick="window.location.href='/2fa'">
             <svg width="18" height="18" viewBox="0 0 24 24" class="btn__icon" aria-hidden="true">
                 <path d="M3 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"
                       stroke-linecap="round" stroke-linejoin="round"/>

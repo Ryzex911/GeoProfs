@@ -8,3 +8,5 @@ Route::redirect('/', '/login');
 // Login + Reset views with proper route names
 Route::view('/login', 'auth.login')->name('login');
 Route::view('/reset-password', 'auth.reset-password')->name('password.request');
+
+Route::view('/2fa', 'auth.2fa')->name('2fa');
