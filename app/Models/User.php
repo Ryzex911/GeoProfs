@@ -16,7 +16,7 @@ class User extends Authenticatable
         'lastname',
         'email',
         'password',
-        'auth_code',
+        'role_id',
     ];
 
     // Mogelijke mutator die wachtwoord automatisch bcrypt
@@ -31,6 +31,15 @@ class User extends Authenticatable
             // Genereer een random 6-cijferige code
             $user->auth_code = rand(1000, 9999);
         });
+    }
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
+    // In User.php
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
     }
 
 
