@@ -27,19 +27,22 @@
 
     {{-- Puur design (geen actie) --}}
     <div>
-        <h1>We hebben een code gesuutrd naar je mail vul het in aub</h1>
+        <h1>We hebben een code gestuurd naar je mail vul het in aub</h1>
     </div>
 
-    <form class="fa-form">
-        <input class="numbers-2fa" type="text">
-        <input class="numbers-2fa" type="text">
-        <input class="numbers-2fa" type="text">
-        <input class="numbers-2fa" type="text">
-        <input class="numbers-2fa" type="text">
-        <input class="numbers-2fa" type="text">
+    <form class="fa-form" method="POST" action="{{ route('2fa.verify') }}">
+        @csrf
+        <input class="numbers-2fa" type="text" name="d1" maxlength="1" inputmode="numeric">
+        <input class="numbers-2fa" type="text" name="d2" maxlength="1" inputmode="numeric">
+        <input class="numbers-2fa" type="text" name="d3" maxlength="1" inputmode="numeric">
+        <input class="numbers-2fa" type="text" name="d4" maxlength="1" inputmode="numeric">
+        <input class="numbers-2fa" type="text" name="d5" maxlength="1" inputmode="numeric">
+        <input class="numbers-2fa" type="text" name="d6" maxlength="1" inputmode="numeric">
+        <button class="stuur-button"> Stuur</button>
+
     </form>
 
-    <button class="stuur-button"> Stuur</button>
+
 
 
     <footer class="card-2fa-footer">

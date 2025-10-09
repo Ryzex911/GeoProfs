@@ -30,7 +30,8 @@
     </header>
 
     {{-- Puur design (geen actie) --}}
-    <form class="form" action="#" method="get" onsubmit="return false;">
+    <form class="form" action="{{ route('login.perform') }}" method="POST">
+        @csrf
         <div class="field">
             <label for="email">E-mailadres</label>
             <input id="email" name="email" type="email" placeholder="naam@bedrijf.nl"/>
@@ -45,17 +46,17 @@
                     <input type="checkbox"/>
                     <span>Onthoud mij</span>
                 </label>
-                <a class="link" href="{{ route('password.request') }}">Wachtwoord vergeten?</a>            </div>
+                <a class="link" href="{{ route('password.request') }}">Wachtwoord vergeten?</a>
+            </div>
         </div>
 
-        <button class="btn btn--primary" type="button" onclick="window.location.href='/2fa'">
+        <button class="btn btn--primary" type="submit">
             <svg width="18" height="18" viewBox="0 0 24 24" class="btn__icon" aria-hidden="true">
                 <path d="M3 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"
                       stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             Inloggen
         </button>
-
     </form>
 
     <footer class="card__footer">

@@ -13,9 +13,9 @@ class UserSeeder extends Seeder
     public function run()
     {
         \App\Models\User::create([
-            'name' => 'Lukas',
-            'lastname' => 'de Greef',
-            'email' => '1@1.com',
+            'name' => 'Tawfik',
+            'lastname' => 'Alabed',
+            'email' => 'ryzexgamer1@gmail.com',
             'password' => '12345678',
         ]);
     }
