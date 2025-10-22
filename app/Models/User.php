@@ -25,13 +25,6 @@ class User extends Authenticatable
         $this->attributes['password'] = bcrypt($value);
     }
 
-    protected static function booted()
-    {
-        static::creating(function ($user) {
-            // Genereer een random 6-cijferige code
-            $user->auth_code = rand(1000, 9999);
-        });
-    }
     public function team()
     {
         return $this->belongsTo(Team::class);
