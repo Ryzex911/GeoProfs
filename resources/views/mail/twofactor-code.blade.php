@@ -1,12 +1,16 @@
-<x-mail::message>
-# Introduction
+@component('mail::message')
+    # Bevestig je login
 
-The body of your message.
+    Gebruik deze 2FA-code binnen 10 minuten:
 
-<x-mail::button :url="''">
-Button Text
-</x-mail::button>
+    @component('mail::panel')
+        <span style="font-size:24px; letter-spacing:2px; font-weight:700;">
+    {{ $code }}
+</span>
+    @endcomponent
 
-Thanks,<br>
-{{ config('app.name') }}
-</x-mail::message>
+    Als jij dit niet was, kun je deze mail negeren.
+
+    Groeten,
+    {{ config('app.name') }}
+@endcomponent

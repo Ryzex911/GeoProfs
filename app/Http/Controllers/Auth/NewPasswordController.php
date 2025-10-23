@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Validation\Rules\Password as PasswordRule;
 class NewPasswordController extends Controller
 {
     public function create(Request $request)
