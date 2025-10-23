@@ -30,20 +30,24 @@
     </header>
 
     {{-- Puur design (geen actie) --}}
-    <form class="form" action="{{ route('login.perform') }}" method="POST">
+    <form class="form" method="POST" action="{{ route('login.perform') }}">
         @csrf
+
+        @error('email') <div class="alert alert-danger">{{ $message }}</div> @enderror
+        @error('password') <div class="alert alert-danger">{{ $message }}</div> @enderror
+
         <div class="field">
             <label for="email">E-mailadres</label>
-            <input id="email" name="email" type="email" placeholder="naam@bedrijf.nl"/>
+            <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="naam@bedrijf.nl" required />
             <small class="hint">Gebruik je zakelijke e-mail.</small>
         </div>
 
         <div class="field">
             <label for="password">Wachtwoord</label>
-            <input id="password" name="password" type="password" placeholder="••••••••"/>
+            <input id="password" name="password" type="password" placeholder="••••••••" required />
             <div class="field__row">
                 <label class="checkbox">
-                    <input type="checkbox"/>
+                    <input type="checkbox" name="remember" />
                     <span>Onthoud mij</span>
                 </label>
                 <a class="link" href="{{ route('password.request') }}">Wachtwoord vergeten?</a>
@@ -51,13 +55,10 @@
         </div>
 
         <button class="btn btn--primary" type="submit">
-            <svg width="18" height="18" viewBox="0 0 24 24" class="btn__icon" aria-hidden="true">
-                <path d="M3 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"
-                      stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
             Inloggen
         </button>
     </form>
+
 
     <footer class="card__footer">
         <p class="muted">Problemen met inloggen? <a class="link" href="#">Neem contact op</a>.</p>

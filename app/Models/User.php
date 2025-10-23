@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\CanResetPassword; // Voor wachtwoord reset
 
 class User extends Authenticatable
 {
@@ -19,21 +18,26 @@ class User extends Authenticatable
         'role_id',
     ];
 
-    // Mogelijke mutator die wachtwoord automatisch bcrypt
-    public function setPasswordAttribute($value): void
+    //  Single source of truth: this auto-hashes on set
+    protected $casts = [
+        'password' => 'hashed',
+    ];
+
+    protected static function booted()
     {
-        $this->attributes['password'] = bcrypt($value);
+        static::creating(function ($user) {
+            // Genereer een random 6 nummerige code
+            $user->auth_code = rand(1000, 9999);
+        });
     }
 
     public function team()
     {
         return $this->belongsTo(Team::class);
     }
-    // In User.php
+
     public function role()
     {
         return $this->belongsTo(Role::class);
     }
-
-
 }

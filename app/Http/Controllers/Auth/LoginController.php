@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -15,33 +16,28 @@ class LoginController extends Controller
 
     public function login(Request $request): \Illuminate\Http\RedirectResponse
     {
-        // 1) Basis validatie
+        // 1) Valideer invoer
         $credentials = $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
+            'email'    => ['required','email','exists:users,email'],
+            'password' => ['required','string'],
+        ], [
+            'email.exists' => 'Dit e-mailadres is niet bekend.',
         ]);
 
-        // 2) Probeer in te loggen
-        if (Auth::attempt($credentials)) {
-            // 3) Verfris sessie (beveiliging) en zorg dat user echt ingelogd blijft
-            $request->session()->regenerate();
-
-            // 4) -> 2FA stap: stuur naar /2fa zodat mail met code wordt verstuurd
-            return redirect()->route('2fa.show');
+        // 2) Zoek user en check wachtwoord
+        $user = User::where('email', $credentials['email'])->first();
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+            return back()->withErrors([
+                'email' => 'Onjuist e-mailadres of wachtwoord.',
+            ])->onlyInput('email');
         }
 
-        // 5) Mislukt? Terug met foutmelding
-        return back()->withErrors([
-            'email' => 'De ingevoerde gegevens zijn onjuist.',
-        ])->onlyInput('email');
-    }
+        // 3) Wachtwoord klopt → zet pending 2FA in sessie (nog NIET inloggen)
+        $request->session()->put('2fa:user:id', $user->id);
+        $request->session()->put('2fa:remember', (bool) $request->boolean('remember'));
 
+        // (Hier kan je je eigen 2FA-code versturen)
 
-    public function logout(Request $request): \Illuminate\Http\RedirectResponse
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect('/login');
+        return redirect()->route('2fa.show');
     }
 }

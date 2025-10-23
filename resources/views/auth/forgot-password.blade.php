@@ -26,7 +26,7 @@
         <p class="muted">Vul je e-mail in. We sturen je een resetlink.</p>
     </header>
 
-    <form class="form" method="POST" action="{{ route('password.email') }}">
+    <form method="POST" action="{{ route('password.email') }}">
         @csrf
 
         @if (session('status'))
@@ -37,20 +37,14 @@
         <div class="alert alert-danger">{{ $message }}</div>
         @enderror
 
-        <div class="field">
-            <label for="email">E-mailadres</label>
-            <input id="email" name="email" type="email" placeholder="naam@bedrijf.nl" required />
-            <small class="hint">Je ontvangt binnen enkele minuten een e-mail.</small>
-        </div>
+        <label for="email">E-mailadres</label>
+        <input id="email" name="email" type="email"
+               value="{{ old('email') }}"
+               placeholder="naam@bedrijf.nl" required />
 
-        <button class="btn btn--primary" type="submit">
-            <!-- icon ... -->
-            Stuur resetlink
-        </button>
-
+        <button class="btn btn--primary" type="submit">Stuur resetlink</button>
         <a class="btn btn--ghost" href="{{ route('login') }}">Terug naar inloggen</a>
     </form>
-
 
     <footer class="card__footer">
         <p class="muted">Geen mail ontvangen? Controleer je spam of <a class="link" href="#">contacteer support</a>.</p>
