@@ -26,20 +26,23 @@
         <p class="muted">Vul je e-mail in. We sturen je een resetlink.</p>
     </header>
 
-    <form class="form" action="#" method="get" onsubmit="return false;">
-        <div class="field">
-            <label for="email">E-mailadres</label>
-            <input id="email" name="email" type="email" placeholder="naam@bedrijf.nl"/>
-            <small class="hint">Je ontvangt binnen enkele minuten een e-mail.</small>
-        </div>
+    <form method="POST" action="{{ route('password.email') }}">
+        @csrf
 
-        <button class="btn btn--primary" type="button">
-            <svg width="18" height="18" viewBox="0 0 24 24" class="btn__icon" aria-hidden="true">
-                <path d="M21 12a9 9 0 10-3.51 7.11M21 12l-3-3m3 3l-3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Stuur resetlink
-        </button>
+        @if (session('status'))
+            <div class="alert alert-success">{{ session('status') }}</div>
+        @endif
 
+        @error('email')
+        <div class="alert alert-danger">{{ $message }}</div>
+        @enderror
+
+        <label for="email">E-mailadres</label>
+        <input id="email" name="email" type="email"
+               value="{{ old('email') }}"
+               placeholder="naam@bedrijf.nl" required />
+
+        <button class="btn btn--primary" type="submit">Stuur resetlink</button>
         <a class="btn btn--ghost" href="{{ route('login') }}">Terug naar inloggen</a>
     </form>
 

@@ -8,20 +8,15 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Droppen alleen als kolom echt bestaat
-            if (Schema::hasColumn('users', 'role')) {
-                $table->dropColumn('role');
-            }
+            // 2FA/OTP code; maak hem gerust langer als je wilt
+            $table->string('auth_code', 10)->nullable()->after('password');
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Terugdraaien: kolom terugzetten als hij ontbreekt
-            if (! Schema::hasColumn('users', 'role')) {
-                $table->string('role')->nullable();
-            }
+            $table->dropColumn('auth_code');
         });
     }
 };

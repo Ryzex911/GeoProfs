@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\EnsureTwoFactorIsPending;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,13 +15,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+        // 1️⃣ Alias registreren (zodat '2fa.pending' werkt in routes)
+        $middleware->alias([
+            '2fa.pending' => EnsureTwoFactorIsPending::class,
         ]);
 
+        // 2️⃣ Optionele cookie-excepties
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
+        // 3️⃣ Web-middleware toevoegen (één keer)
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
@@ -29,4 +32,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->create();
+
