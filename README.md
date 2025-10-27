@@ -20,7 +20,7 @@ Het systeem digitaliseert de registratie van verlof en ziekte en vervangt de hui
 Een gebruiksvriendelijke en efficiënte webapplicatie die het plannen en registreren van verlof bij GeoProfs eenvoudiger en betrouwbaarder maakt.
 
 ## Technische stack
-- **Frontend**: React  
+- **Frontend**: Html / tailwind 
 - **Backend**: Laravel  
 - **Database**: MySQL / PostgreSQL  
 - **Tools**: Git, Docker, CI/CD
