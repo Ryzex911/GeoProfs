@@ -21,4 +21,12 @@ class LoginAttempt extends Model
     protected $casts = [
         'attempted_at' => 'datetime',
     ];
+
+    public function scopeForUser($query, User $user)
+    {
+        return $query->where('user_id', $user->id)
+            ->when($user->attempts_cleared_at, function ($q) use ($user){
+                $q->where('attempted_at', '>', $user->attempts_cleared_at);
+            });
+    }
 }

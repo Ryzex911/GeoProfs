@@ -32,10 +32,7 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
-        $failedAttempts = LoginAttempt::where('user_id', $user->id)->
-        when($user->attempts_cleared_at, function ($query) use ($user) {
-            $query->where('attempted_at', '>', $user->attattempts_cleared_at);
-        })->count();
+        $failedAttempts = LoginAttempt::forUser($user)->count();
 
         // Als gebruiker 3 of meer mislukte pogingen heeft → blokkeren
         if ($failedAttempts >= 3) {
@@ -43,7 +40,7 @@ class LoginController extends Controller
             $user->save();
 
             return back()->withErrors([
-                'email' => 'Je account is tijdelijk geblokkeerd. Neem contact op met ICT.',
+                'email' => 'Je account is geblokkeerd. Neem contact op met ICT.',
             ]);
         }
 
