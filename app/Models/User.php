@@ -15,12 +15,14 @@ class User extends Authenticatable
         'lastname',
         'email',
         'password',
+        'lock_at',
         'role_id',
     ];
 
     //  Single source of truth: this auto-hashes on set
     protected $casts = [
         'password' => 'hashed',
+        'lock_at' => 'datetime',
     ];
 
     protected static function booted()
@@ -39,5 +41,22 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function isLocked(): bool
+    {
+        return !is_null($this->lock_at);
+    }
+
+    public function lockNow(): void
+    {
+        $this->lock_at = now();
+        $this->save();
+    }
+
+    public function unlock(): void
+    {
+        $this->lock_at = null;
+        $this->save();
     }
 }

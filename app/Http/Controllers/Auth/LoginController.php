@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Models\LoginAttempt;
 
 class LoginController extends Controller
 {
@@ -20,17 +21,48 @@ class LoginController extends Controller
 
     public function login(Request $request): RedirectResponse
     {
-        // 1) Validate
-        $data = $request->validate([
-            'email'    => ['required', 'email', 'exists:users,email'],
+        // 1) Valideer invoer
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-        ], [
-            'email.exists' => 'Dit e-mailadres is niet bekend.',
         ]);
 
-        // 2) Find user + check password
-        $user = User::where('email', $data['email'])->first();
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
+        // Checkt of een user geblokkeerd is
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user && $user->isLocked()) {
+            return back()->withErrors([
+                'email' => 'This account is blocked, Contact ICT.'
+            ])->onlyInput('email');
+        }
+
+        $failedAttempts = LoginAttempt::forUser($user)->count();
+
+        // Als gebruiker 3 of meer mislukte pogingen heeft → blokkeren
+        if ($failedAttempts >= 3) {
+            $user->lock_at = now();
+            $user->save();
+
+            return back()->withErrors([
+                'email' => 'Je account is geblokkeerd. Neem contact op met ICT.',
+            ]);
+        }
+
+        // 2) Zoek user en check wachtwoord
+        $user = User::where('email', $credentials['email'])->first();
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+
+            $email = strtolower(trim($request->input('email')));
+            $user = User::where('email', $email)->first();
+
+            LoginAttempt::create([
+                'user_id' => optional($user)->id,   // NULL als user niet bestaat
+                'email_tried' => $email,
+                'attempts' => 1,                     // 1 per rij (afspraak)
+                'attempted_at' => now(),
+            ]);
+
+
             return back()->withErrors([
                 'email' => 'Onjuist e-mailadres of wachtwoord.',
             ])->onlyInput('email');
