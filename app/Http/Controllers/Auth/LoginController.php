@@ -32,7 +32,7 @@ class LoginController extends Controller
 
         if ($user && $user->isLocked()) {
             return back()->withErrors([
-                'email' => 'This account is blocked, Contact ICT.'
+                'email' => 'Je account is tijdelijk geblokkeerd. Neem contact op met ICT.'
             ])->onlyInput('email');
         }
 
