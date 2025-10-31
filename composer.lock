@@ -4,8 +4,72 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9470cbf18f8944238a7009400affa678",
+    "content-hash": "6aedd586f83111fdd3178fa01628f4a6",
     "packages": [
+        {
+            "name": "area17/blast",
+            "version": "1.11.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/area17/blast.git",
+                "reference": "20d690f53f48fb6f24836940229789f6e6495cd6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/area17/blast/zipball/20d690f53f48fb6f24836940229789f6e6495cd6",
+                "reference": "20d690f53f48fb6f24836940229789f6e6495cd6",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/filesystem": "^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/support": "^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/view": "^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "php": "^7.3|^8.0|^8.1"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^6.21|^7.0|^9.0|^10.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "A17\\Blast\\BlastServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "A17\\Blast\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Tim Brook",
+                    "email": "tim@area17.com"
+                }
+            ],
+            "description": "Storybook for Laravel Blade",
+            "homepage": "https://area17.com",
+            "keywords": [
+                "A17",
+                "blade",
+                "components",
+                "design-systems",
+                "laravel",
+                "storybook",
+                "ui"
+            ],
+            "support": {
+                "issues": "https://github.com/area17/blast/issues/",
+                "source": "https://github.com/area17/blast/tree/1.11.0"
+            },
+            "time": "2025-04-17T20:33:44+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.14.0",
