@@ -16,7 +16,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.9",
-        "phpmailer/phpmailer": "^6.11",
+        "phpmailer/phpmailer": "^7.0",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
