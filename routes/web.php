@@ -31,7 +31,7 @@ Route::middleware('2fa.pending')->group(function () {
     Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 });
 
-Route::get('/dashboard', fn () => view('dashboard'))->middleware('auth')->name('dashboard');
+Route::get('/dashboard', fn () => view('Requests.dashboard'))->middleware('auth')->name('dashboard');
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
