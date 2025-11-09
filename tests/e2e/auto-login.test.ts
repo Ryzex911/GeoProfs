@@ -5,7 +5,7 @@ test('Auto login', async ({page}) => {
     await page.goto('http://localhost/login')
 
     await page.fill('input[name="email"]', 'osama.asmi04@gmail.com');
-    await page.fill('input[name="password"]', '12345678');
+    await page.fill('input[name="password"]', 'newPassword123!');
 
     await page.click('button[type="submit"]')
 
