@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -12,11 +12,9 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        \App\Models\User::create([
-            'name' => 'Osama',
-            'lastname' => 'asmi',
-            'email' => 'osama.asmi04@gmail.com',
-            'password' => '12345678'
-        ]);
+        $users = User::factory()->count(10)->create();
+        foreach ($users as $user) {
+            $user->roles()->attach(rand(1, 5));
+        }
     }
 }

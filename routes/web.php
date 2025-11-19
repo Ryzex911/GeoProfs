@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use \App\Http\Controllers\RoleController;
+use \App\Http\Controllers\UserController;
 
 
 Route::redirect('/', '/login');
@@ -42,3 +43,4 @@ Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
     ->name('2fa.resend');
 
 Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
