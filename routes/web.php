@@ -31,11 +31,19 @@ Route::middleware('2fa.pending')->group(function () {
     Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 });
 
-Route::get('/dashboard', fn () => view('Requests.dashboard'))->middleware('auth')->name('dashboard');
 
+//Hier is de route naar de medewerker dashboard na het inloggen om zijn overzicht te zien
+Route::get('/dashboard', fn () => view('requests.dashboard'))
+    ->middleware('auth')
+    ->name('dashboard');
+
+//Dit is de route naar de verlof aanvraag pagina met form en reden etc..
+Route::get('/requestdashboard', fn () => view('requests.request-dashboard'))
+    ->middleware('auth')
+    ->name('requestdashboard');
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
-
+//dat is de 2fa opnieuw stuur knopje methode
 Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
     ->middleware('2fa.pending')
     ->name('2fa.resend');
