@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('employee_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('manager_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->enum('type', ['TVT', 'Vakantie', 'Anders']);
+            $table->enum('type', ['Ziek', 'Vakantie', 'Anders']);
             $table->string('reason', 255)->nullable();
             $table->date('start_date');
             $table->date('end_date');
