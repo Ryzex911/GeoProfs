@@ -1,0 +1,162 @@
+
+:root{
+    --geo-blue:#0E3A5B; --geo-green:#3FB950; --bg:#F3F4F6; --text:#0F172A;
+    --muted:#E5E7EB; --card:#FFFFFF; --radius:16px; --shadow:0 12px 30px rgba(0,0,0,.06);
+}
+
+/* Base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.container{max-width:1140px;margin:0 auto;padding:24px}
+
+/* Hero */
+.hero{
+    background: radial-gradient(140% 120% at 10% 0%, #164C75 0%, #0E3A5B 60%) no-repeat;
+    color:#fff; padding:28px 0 34px; position:relative;
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,.15);
+}
+.hero__header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.hero__title{font-size:28px;font-weight:700;margin:0}
+.hero__actions{display:flex;align-items:center;gap:10px}
+.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);padding:8px 12px;border-radius:12px;cursor:pointer}
+.btn-ghost:hover{background:rgba(255,255,255,.12)}
+.pill{width:44px;height:24px;border-radius:999px;background:rgba(255,255,255,.25);position:relative}
+.pill::after{content:"";position:absolute;inset:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;opacity:.9}
+
+/* Grid */
+.grid{display:grid;gap:24px}
+.grid-3-2{grid-template-columns:2fr 1.4fr 1fr}
+@media (max-width:1100px){.grid-3-2{grid-template-columns:1fr 1fr}}
+@media (max-width:800px){.grid-3-2{grid-template-columns:1fr}}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--muted);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card__header{padding:18px 20px;border-bottom:1px solid var(--muted)}
+.card__title{margin:0;font-weight:600}
+.card__body{padding:20px}
+
+/* Calendar (placeholder, toegankelijk) */
+.calendar{display:grid;gap:10px}
+.cal-head{display:flex;align-items:center;justify-content:space-between}
+.cal-title{font-weight:600}
+.cal-actions{display:flex;gap:6px}
+.cal-btn{border:1px solid var(--muted);background:#fff;border-radius:10px;padding:8px 10px;cursor:not-allowed;opacity:.6}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.cal-grid .dow{font-size:12px;opacity:.7;text-align:center}
+.cal-grid button{height:40px;border:1px solid #E5E7EB;background:#fff;border-radius:10px;cursor:pointer}
+.cal-grid button[disabled]{cursor:not-allowed;opacity:.65}
+.cal-grid .is-today{border-color:var(--geo-blue);box-shadow:0 0 0 2px rgba(14,58,91,.15)}
+
+/* Tiles/reden */
+.tiles{display:grid;gap:12px}
+.tile{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--muted);border-radius:12px;background:#FAFAFA;cursor:pointer;transition:.15s}
+.tile:hover{transform:translateY(-1px)}
+.tile.is-selected{border-color:var(--geo-blue);box-shadow:0 0 0 3px rgba(14,58,91,.12)}
+.tile__title{font-weight:600}
+.small-note{font-size:12px;opacity:.7}
+
+/* Inputs */
+.formgrid{display:grid;gap:14px}
+label{font-weight:500}
+.input, textarea, select{width:100%;padding:12px 13px;border:1px solid var(--muted);border-radius:12px;background:#fff;font:inherit}
+textarea{min-height:96px;resize:vertical}
+.help{font-size:12px;opacity:.75}
+
+/* Saldo KPI */
+.kpi{
+    display:flex;align-items:center;justify-content:center;
+    height:120px;background:#F7FAF9;border:1px solid #DCFCE7;border-radius:14px;
+}
+.kpi b{color:#15803D;font-size:28px}
+
+/* Actions */
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn{padding:12px 16px;border-radius:12px;border:0;cursor:pointer;font-weight:600}
+.btn-primary{background:var(--geo-blue);color:#fff}
+.btn-secondary{background:#fff;color:var(--geo-blue);border:1px solid var(--geo-blue)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+
+/* Summary */
+.summary{background:#FCFDFE;border:1px dashed #C7D2FE;border-radius:14px;padding:14px;font-size:14px}
+
+/* Toast */
+.toast{
+    position:fixed;right:22px;bottom:22px;background:#0F766E;color:#fff;
+    padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);transform:translateY(20px);opacity:0;pointer-events:none;transition:.2s
+}
+.toast.show{transform:translateY(0);opacity:1}
+
+.topbar {
+    background: var(--card);
+    padding: 16px 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.userbox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.userbox img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+}
+.has-error{
+    border-color:#dc2626;
+    box-shadow:0 0 0 1px rgba(220,38,38,.25);
+}
+
+/* Calendar buttons – beetje polish */
+.cal-grid button{
+    height:40px;
+    border:1px solid #E5E7EB;
+    background:#fff;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.15s;
+}
+.cal-grid button:hover:not(:disabled){
+    box-shadow:0 0 0 2px rgba(14,58,91,.12);
+}
+
+/* Vorige/volgende maand knoppen moeten klikbaar zijn */
+.cal-btn{
+    border:1px solid var(--muted);
+    background:#fff;
+    border-radius:10px;
+    padding:8px 10px;
+    cursor:pointer;        /* was not-allowed */
+    opacity:1;             /* was .6 */
+}
+
+/* Dagen die niet gekozen mogen worden (verleden/minDate) */
+.cal-grid button.is-disabled{
+    opacity:.35;
+    cursor:not-allowed;
+}
+
+/* Range-select zoals in je voorbeeld */
+.cal-grid button.is-range-start,
+.cal-grid button.is-range-end{
+    background:#4F46E5;          /* hier kun je ook var(--geo-blue) gebruiken */
+    border-color:#4F46E5;
+    color:#fff;
+}
+
+.cal-grid button.is-in-range{
+    background:#E5E7FF;
+    border-color:#4F46E5;
+    color:#111827;
+}
+
+/* had je al, maar nu compleet */
+.has-error{
+    border-color:#dc2626;
+    box-shadow:0 0 0 1px rgba(220,38,38,.25);
+}

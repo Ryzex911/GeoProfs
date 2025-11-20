@@ -5,118 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Verlof aanvragen — GeoProfs</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/request-dashboard.css') }}">
 
-    <style>
-        :root{
-            --geo-blue:#0E3A5B; --geo-green:#3FB950; --bg:#F3F4F6; --text:#0F172A;
-            --muted:#E5E7EB; --card:#FFFFFF; --radius:16px; --shadow:0 12px 30px rgba(0,0,0,.06);
-        }
 
-        /* Base */
-        *{box-sizing:border-box}
-        html,body{height:100%}
-        body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--text)}
-        .container{max-width:1140px;margin:0 auto;padding:24px}
-
-        /* Hero */
-        .hero{
-            background: radial-gradient(140% 120% at 10% 0%, #164C75 0%, #0E3A5B 60%) no-repeat;
-            color:#fff; padding:28px 0 34px; position:relative;
-            box-shadow: inset 0 -1px 0 rgba(255,255,255,.15);
-        }
-        .hero__header{display:flex;align-items:center;justify-content:space-between;gap:16px}
-        .hero__title{font-size:28px;font-weight:700;margin:0}
-        .hero__actions{display:flex;align-items:center;gap:10px}
-        .btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);padding:8px 12px;border-radius:12px;cursor:pointer}
-        .btn-ghost:hover{background:rgba(255,255,255,.12)}
-        .pill{width:44px;height:24px;border-radius:999px;background:rgba(255,255,255,.25);position:relative}
-        .pill::after{content:"";position:absolute;inset:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;opacity:.9}
-
-        /* Grid */
-        .grid{display:grid;gap:24px}
-        .grid-3-2{grid-template-columns:2fr 1.4fr 1fr}
-        @media (max-width:1100px){.grid-3-2{grid-template-columns:1fr 1fr}}
-        @media (max-width:800px){.grid-3-2{grid-template-columns:1fr}}
-
-        /* Card */
-        .card{background:var(--card);border:1px solid var(--muted);border-radius:var(--radius);box-shadow:var(--shadow)}
-        .card__header{padding:18px 20px;border-bottom:1px solid var(--muted)}
-        .card__title{margin:0;font-weight:600}
-        .card__body{padding:20px}
-
-        /* Calendar (placeholder, toegankelijk) */
-        .calendar{display:grid;gap:10px}
-        .cal-head{display:flex;align-items:center;justify-content:space-between}
-        .cal-title{font-weight:600}
-        .cal-actions{display:flex;gap:6px}
-        .cal-btn{border:1px solid var(--muted);background:#fff;border-radius:10px;padding:8px 10px;cursor:not-allowed;opacity:.6}
-        .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-        .cal-grid .dow{font-size:12px;opacity:.7;text-align:center}
-        .cal-grid button{height:40px;border:1px solid #E5E7EB;background:#fff;border-radius:10px;cursor:pointer}
-        .cal-grid button[disabled]{cursor:not-allowed;opacity:.65}
-        .cal-grid .is-today{border-color:var(--geo-blue);box-shadow:0 0 0 2px rgba(14,58,91,.15)}
-
-        /* Tiles/reden */
-        .tiles{display:grid;gap:12px}
-        .tile{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--muted);border-radius:12px;background:#FAFAFA;cursor:pointer;transition:.15s}
-        .tile:hover{transform:translateY(-1px)}
-        .tile.is-selected{border-color:var(--geo-blue);box-shadow:0 0 0 3px rgba(14,58,91,.12)}
-        .tile__title{font-weight:600}
-        .small-note{font-size:12px;opacity:.7}
-
-        /* Inputs */
-        .formgrid{display:grid;gap:14px}
-        label{font-weight:500}
-        .input, textarea, select{width:100%;padding:12px 13px;border:1px solid var(--muted);border-radius:12px;background:#fff;font:inherit}
-        textarea{min-height:96px;resize:vertical}
-        .help{font-size:12px;opacity:.75}
-
-        /* Saldo KPI */
-        .kpi{
-            display:flex;align-items:center;justify-content:center;
-            height:120px;background:#F7FAF9;border:1px solid #DCFCE7;border-radius:14px;
-        }
-        .kpi b{color:#15803D;font-size:28px}
-
-        /* Actions */
-        .actions{display:flex;gap:12px;flex-wrap:wrap}
-        .btn{padding:12px 16px;border-radius:12px;border:0;cursor:pointer;font-weight:600}
-        .btn-primary{background:var(--geo-blue);color:#fff}
-        .btn-secondary{background:#fff;color:var(--geo-blue);border:1px solid var(--geo-blue)}
-        .btn:disabled{opacity:.6;cursor:not-allowed}
-
-        /* Summary */
-        .summary{background:#FCFDFE;border:1px dashed #C7D2FE;border-radius:14px;padding:14px;font-size:14px}
-
-        /* Toast */
-        .toast{
-            position:fixed;right:22px;bottom:22px;background:#0F766E;color:#fff;
-            padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);transform:translateY(20px);opacity:0;pointer-events:none;transition:.2s
-        }
-        .toast.show{transform:translateY(0);opacity:1}
-
-        .topbar {
-            background: var(--card);
-            padding: 16px 26px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .userbox {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .userbox img {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-        }
-
-    </style>
 </head>
 
 <body>
@@ -172,9 +63,9 @@
                         <span class="tile__title">Verlof</span>
                         <span class="small-note">Betaald verlof / vrij</span>
                     </button>
-                    <button class="tile" role="tab" aria-selected="false" data-reason="ziekte">
-                        <span class="tile__title">Ziekte</span>
-                        <span class="small-note">Ziekmelding</span>
+                    <button class="tile" role="tab" aria-selected="false" data-reason="TVT">
+                        <span class="tile__title">TVT</span>
+                        <span class="small-note">Tijd voor tijd</span>
                     </button>
                     <button class="tile" role="tab" aria-selected="false" data-reason="overig">
                         <span class="tile__title">Overig</span>
@@ -186,14 +77,12 @@
                     <div>
                         <label for="from">Van</label>
                         <input id="from" class="input" type="datetime-local" />
-                        <div class="help">Bijv. 2025-01-12 09:00</div>
                     </div>
 
                     <div>
                         <label for="to">Tot</label>
                         <input id="to" class="input" type="datetime-local" />
-                        <div class="help">Bijv. 2025-01-12 17:00</div>
-                    </div>
+                        </div>
 
                     <div id="overigWrap" style="display:none">
                         <label for="overig">Andere reden (optioneel)</label>
@@ -235,15 +124,20 @@
 <div class="toast" id="toast" role="status" aria-live="polite"> Verlofverzoek is verzonden!</div>
 
 <script>
-    /* Reden tiles */
+    /* ========== REDEN TILES ========== */
     const tiles = document.querySelectorAll('.tile');
     const sReason = document.getElementById('sReason');
     const overigWrap = document.getElementById('overigWrap');
 
     tiles.forEach(t => {
         t.addEventListener('click', () => {
-            tiles.forEach(x => { x.classList.remove('is-selected'); x.setAttribute('aria-selected','false'); });
-            t.classList.add('is-selected'); t.setAttribute('aria-selected','true');
+            tiles.forEach(x => {
+                x.classList.remove('is-selected');
+                x.setAttribute('aria-selected','false');
+            });
+            t.classList.add('is-selected');
+            t.setAttribute('aria-selected','true');
+
             const reason = t.dataset.reason;
             sReason.textContent = reason.charAt(0).toUpperCase()+reason.slice(1);
             overigWrap.style.display = (reason === 'overig') ? 'block' : 'none';
@@ -251,55 +145,240 @@
         });
     });
 
-    /* Samenvatting + validatie */
-    const from = document.getElementById('from');
-    const to = document.getElementById('to');
-    const sFrom = document.getElementById('sFrom');
-    const sTo = document.getElementById('sTo');
-    const sHours = document.getElementById('sHours');
+    /* ========== DATUM / VALIDATIE ========== */
+    const from    = document.getElementById('from');
+    const to      = document.getElementById('to');
+    const sFrom   = document.getElementById('sFrom');
+    const sTo     = document.getElementById('sTo');
+    const sHours  = document.getElementById('sHours');
     const submitBtn = document.getElementById('submitBtn');
+
+    // echte "nu"
+    const today = new Date();
+
+    // minimaal 7 dagen van tevoren
+    const MIN_DAGEN_VAN_TE_VOREN = 7;
+    const minDate = new Date(today.getTime());
+    minDate.setDate(minDate.getDate() + MIN_DAGEN_VAN_TE_VOREN);
+
+    function toInputValue(date) {
+        // lokale tijd omzetten naar value voor datetime-local
+        const off = date.getTimezoneOffset();
+        const local = new Date(date.getTime() - off * 60000);
+        return local.toISOString().slice(0, 16);
+    }
+
+    const minStr = toInputValue(minDate);
+    from.min = minStr;
+    to.min   = minStr;
 
     function hoursBetween(a,b){
         const start = new Date(a), end = new Date(b);
         const ms = end - start;
         if (isNaN(ms) || ms <= 0) return 0;
-        return +(ms / 36e5).toFixed(2); // uren met 2 decimalen
+        return +(ms / 36e5).toFixed(2);
     }
 
     function validate(){
-        sFrom.textContent = from.value ? new Date(from.value).toLocaleString() : '—';
-        sTo.textContent   = to.value ? new Date(to.value).toLocaleString() : '—';
-        const h = hoursBetween(from.value, to.value);
-        sHours.textContent = h;
-        submitBtn.disabled = !(h > 0);
-    }
-    from.addEventListener('change', validate);
-    to.addEventListener('change', validate);
+        let valid = true;
+        const fromDate = from.value ? new Date(from.value) : null;
+        const toDate   = to.value   ? new Date(to.value)   : null;
 
-    /* Kalender klik (zet alleen 'Van' als voorbeeld) */
-    document.querySelectorAll('[data-day]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-            const day = btn.dataset.day.padStart(2,'0');
-            const date = `2022-01-${day}T09:00`;
-            from.value = date;
-            to.value = `2022-01-${day}T17:00`;
+        from.classList.remove('has-error');
+        to.classList.remove('has-error');
+
+        sFrom.textContent = fromDate ? fromDate.toLocaleString() : '—';
+        sTo.textContent   = toDate   ? toDate.toLocaleString()   : '—';
+
+        // 1) minimaal 1 week van tevoren
+        if (fromDate && fromDate < minDate) {
+            valid = false;
+            from.classList.add('has-error');
+        }
+        if (toDate && toDate < minDate) {
+            valid = false;
+            to.classList.add('has-error');
+        }
+
+        // 2) tot mag niet vóór van
+        if (fromDate && toDate && toDate <= fromDate) {
+            valid = false;
+            to.classList.add('has-error');
+        }
+
+        const h = (fromDate && toDate && valid) ? hoursBetween(from.value, to.value) : 0;
+        sHours.textContent = h;
+        submitBtn.disabled = !(valid && h > 0);
+    }
+
+    from.addEventListener('change', () => {
+        if (from.value) {
+            to.min = from.value;
+            if (to.value && to.value < from.value) {
+                to.value = from.value;
+            }
+        } else {
+            to.min = minStr;
+        }
+        validate();
+        renderRange(); // inputs wijzigen → range updaten
+    });
+
+    to.addEventListener('change', () => {
+        validate();
+        renderRange();
+    });
+
+    /* ========== KALENDER: MAAND / JAAR ========== */
+
+    const monthLabel = document.getElementById('monthLabel');
+    const monthNames = [
+        'Januari','Februari','Maart','April','Mei','Juni',
+        'Juli','Augustus','September','Oktober','November','December'
+    ];
+
+    let currentYear  = today.getFullYear();
+    let currentMonth = today.getMonth(); // 0–11
+
+    function updateMonthLabel() {
+        monthLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    }
+    updateMonthLabel();
+
+    const prevBtn = document.querySelector('.cal-actions button:first-child');
+    const nextBtn = document.querySelector('.cal-actions button:last-child');
+
+    prevBtn.style.cursor = 'pointer';
+    nextBtn.style.cursor = 'pointer';
+    prevBtn.removeAttribute('aria-disabled');
+    nextBtn.removeAttribute('aria-disabled');
+
+    function goToPrevMonth() {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        updateMonthLabel();
+        renderRange();
+    }
+
+    function goToNextMonth() {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        updateMonthLabel();
+        renderRange();
+    }
+
+    prevBtn.addEventListener('click', goToPrevMonth);
+    nextBtn.addEventListener('click', goToNextMonth);
+
+    /* ========== KALENDER: RANGE-SELECT ========== */
+
+    const dayButtons = document.querySelectorAll('[data-day]');
+    let rangeStart = null; // Date
+    let rangeEnd   = null; // Date
+
+    function getDateForButton(btn) {
+        const day = btn.dataset.day.padStart(2, '0');
+        const monthStr = String(currentMonth + 1).padStart(2, '0');
+        return new Date(`${currentYear}-${monthStr}-${day}T00:00:00`);
+    }
+
+    function setTime(date, hours) {
+        const d = new Date(date.getTime());
+        d.setHours(hours, 0, 0, 0);
+        return d;
+    }
+
+    function renderRange() {
+        dayButtons.forEach(btn => {
+            const d = getDateForButton(btn);
+
+            // reset classes
+            btn.classList.remove('is-disabled','is-range-start','is-range-end','is-in-range');
+
+            // disable oude datums
+            if (d < minDate) {
+                btn.classList.add('is-disabled');
+                return;
+            }
+
+            if (!rangeStart) return;
+
+            const start = new Date(rangeStart);
+            const end   = rangeEnd ? new Date(rangeEnd) : start;
+
+            if (+d === +start) {
+                btn.classList.add('is-range-start');
+            } else if (+d === +end) {
+                btn.classList.add('is-range-end');
+            } else if (d > start && d < end) {
+                btn.classList.add('is-in-range');
+            }
+        });
+    }
+
+    dayButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const d = getDateForButton(btn);
+
+            if (d < minDate) {
+                alert('Je kunt geen verlof in het verleden of minder dan 1 week van tevoren aanvragen.');
+                return;
+            }
+
+            // Als nog geen start, of er is al start+end, of klik is vóór huidige start → nieuwe range starten
+            if (!rangeStart || (rangeStart && rangeEnd) || d < rangeStart) {
+                rangeStart = d;
+                rangeEnd   = null;
+            } else {
+                // tweede klik → eind van de range
+                rangeEnd = d;
+            }
+
+            // Van/Tot invullen
+            const startForInput = setTime(rangeStart, 9);  // 09:00
+            from.value = toInputValue(startForInput);
+
+            let endForInput;
+            if (rangeEnd) {
+                endForInput = setTime(rangeEnd, 17);       // 17:00
+            } else {
+                endForInput = setTime(rangeStart, 17);     // 17:00 zelfde dag
+            }
+            to.value = toInputValue(endForInput);
+
             validate();
+            renderRange();
         });
     });
 
-    /* Submit/Reset (mock) */
+    /* ========== SUBMIT / RESET (mock) ========== */
     const toast = document.getElementById('toast');
     document.getElementById('submitBtn').addEventListener('click', ()=>{
-        // hier zou je fetch/axios doen; nu alleen een toast
         toast.classList.add('show');
         setTimeout(()=>toast.classList.remove('show'), 2200);
     });
 
     document.getElementById('resetBtn').addEventListener('click', ()=>{
-        from.value = ""; to.value = "";
+        from.value = "";
+        to.value   = "";
         document.getElementById('overig').value = "";
+        rangeStart = null;
+        rangeEnd   = null;
         validate();
+        renderRange();
     });
+
+    // eerste run
+    validate();
+    renderRange();
 </script>
+
+
 </body>
 </html>
