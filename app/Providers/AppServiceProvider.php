@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Policies\UserPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -29,5 +32,7 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(function () {
             return Password::min(8); // minimaal 6 tekens
         });
+
+        Gate::policy(User::class, UserPolicy::class);
     }
 }

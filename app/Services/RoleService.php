@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Role;
 
-class RoleService
+class   RoleService
 {
 
     // Alle rollen ophalen

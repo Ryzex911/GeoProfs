@@ -45,12 +45,16 @@
                 {{ $user->roles->pluck('name')->join(', ') ?: 'Geen rol' }}
             </td>
             <td>
+                @can('updateRoles', $user)
                 <button
                     onclick="openModal({{ $user->id }}, {{ $user->roles->pluck('id') }})"
                     data-user-id="{{ $user->id }}"
                     data-user-roles="{{ $user->roles->pluck('id') }}"
                     class="open-modal">Bewerken
                 </button>
+                @else
+                    <span style="color: gray;">Geen toegang</span>
+                @endcan
             </td>
         </tr>
     @endforeach

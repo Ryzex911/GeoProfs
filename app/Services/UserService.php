@@ -13,9 +13,8 @@ class UserService
         return User::with('roles')->get();
     }
 
-    public function updateRoles($userId, $roles)
+    public function updateRoles(User $user, array $roleIds)
     {
-        $user = User::findOrFail($userId);
-        $user->roles()->sync($roles);
+        $user->roles()->sync($roleIds);
     }
 }
