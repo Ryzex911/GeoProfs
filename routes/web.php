@@ -44,3 +44,4 @@ Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
 
 Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
+Route::put('/user/{id}/roles', [UserController::class, 'updateUserRoles']);
