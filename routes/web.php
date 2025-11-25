@@ -39,3 +39,8 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
     ->middleware('2fa.pending')
     ->name('2fa.resend');
+
+Route::get('/manager/requests', function () {
+    return view('Requests.manager-dashboard');
+})->middleware(['auth']);
+
