@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="/js/user-roles.js" defer></script>
+    <script src="/js/user-roles.js"></script>
     <title>Users</title>
 </head>
 
 <body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+{{--Stijling moet verplaats worden naar een css bestand--}}
 <style>
     #roleModal {
         display: none;
@@ -27,6 +28,24 @@
         border-radius: 5px;
     }
 </style>
+
+@if ($errors->any())
+    <div style="color: red; padding: 10px; margin-bottom: 10px;">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+@if (session('success'))
+    <div style="color: green; padding: 10px; margin-bottom: 10px;">
+        {{ session('success') }}
+    </div>
+@endif
+
+{{--Users tabel--}}
 <table>
     <thead>
     <tr>
@@ -47,10 +66,10 @@
             <td>
                 @can('updateRoles', $user)
                 <button
-                    onclick="openModal({{ $user->id }}, {{ $user->roles->pluck('id') }})"
                     data-user-id="{{ $user->id }}"
-                    data-user-roles="{{ $user->roles->pluck('id') }}"
-                    class="open-modal">Bewerken
+                    data-user-roles='{{ $user->roles->pluck('id')->toJson() }}'
+                    id="closeModalBtn">
+                    Bewerken
                 </button>
                 @else
                     <span style="color: gray;">Geen toegang</span>
@@ -60,6 +79,8 @@
     @endforeach
     </tbody>
 </table>
+
+{{--Modal om rollen te wijzigen--}}
 <div id="roleModal" style="display:none;">
     <div>
         <h3>Rol aanpassen</h3>
@@ -68,11 +89,15 @@
             @csrf
             @method('PUT')
 
-            <select name="roles[]" id="roleSelect" multiple size="5">
+            <label for="roleSelect">Selecteer rollen:</label>
+            <div>
                 @foreach($allRoles as $role)
-                    <option value="{{ $role->id }}">{{ $role->name }}</option>
+                    <label>
+                        <input type="checkbox" name="roles[]" value="{{ $role->id }}">
+                        {{ $role->name }}
+                    </label>
                 @endforeach
-            </select>
+            </div>
 
             <button type="submit">Opslaan</button>
             <button type="button" onclick="closeModal()">Sluiten</button>

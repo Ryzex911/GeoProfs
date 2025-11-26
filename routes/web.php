@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\TwoFactorController;
-use \App\Http\Controllers\RoleController;
-use \App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
 
 
 Route::redirect('/', '/login');
@@ -42,6 +42,15 @@ Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
     ->middleware('2fa.pending')
     ->name('2fa.resend');
 
-Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-Route::get('/users', [UserController::class, 'index'])->name('users.index')->middleware('auth');
-Route::put('/user/{id}/roles', [UserController::class, 'updateUserRoles'])->middleware('auth');
+// User & Role systeem routes (alleen voor ingelogde users)
+Route::middleware('auth')->group(function () {
+
+    Route::get('/users', [UserController::class, 'index'])
+        ->name('users.index');
+
+    Route::put('/users/{user}/roles', [UserController::class, 'updateUserRoles'])
+        ->name('users.updateRoles');
+
+    Route::get('/roles', [RoleController::class, 'index'])
+        ->name('roles.index');
+});

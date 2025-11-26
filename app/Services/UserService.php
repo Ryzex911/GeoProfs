@@ -4,16 +4,26 @@ namespace App\Services;
 
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 
 class UserService
 {
 
-    public function getAllUsers()
+    // Alle gebruikers met hun rollen ophalen
+    public function getAllUsers(): Collection
     {
+        // Eager loading voorkomt n+1 probleem
         return User::with('roles')->get();
     }
 
-    public function updateRoles(User $user, array $roleIds)
+    // Alle rollen ophalen
+    public function getAllRoles(): Collection
+    {
+        return Role::all();
+    }
+
+    // Gebruikersrollen bijwerken via privot tabel
+    public function updateRoles(User $user, array $roleIds): void
     {
         $user->roles()->sync($roleIds);
     }

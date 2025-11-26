@@ -39,8 +39,7 @@ class LoginController extends Controller
 
         // Als gebruiker 3 of meer mislukte pogingen heeft → blokkeren
         if ($failedAttempts >= 3) {
-            $user->lock_at = now();
-            $user->save();
+            $user->lockNow();
 
             return back()->withErrors([
                 'email' => 'Je account is geblokkeerd. Neem contact op met ICT.',
