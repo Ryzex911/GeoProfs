@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\TwoFactorController;
+use Illuminate\Support\Facades\DB;
 
 
 Route::redirect('/', '/login');
@@ -47,3 +48,9 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
     ->middleware('2fa.pending')
     ->name('2fa.resend');
+
+//dit is voor het laten zien van de leave requests
+Route::get('/leave-requests', function () {
+    $requests = DB::table('leave_requests')->get();
+    return view('leave.index', compact('requests'));
+});

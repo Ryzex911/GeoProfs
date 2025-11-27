@@ -22,9 +22,9 @@ class LeaveRequestFactory extends Factory
         $endDate = (clone $startDate)->modify('+' . rand(1, 29) . 'days');
 
         return [
-            'employee_id' => 8,
-            'manager_id' => 7,
-            'type' => $this->faker->randomElement(['ziek', 'vakantie', 'ander']),
+            'employee_id' => 1,
+            'manager_id' => 1,
+            'type' => $this->faker->randomElement(['TVT', 'Vakantie', 'Anders']),
             'reason' => $this->faker->sentence(10),
             'start_date' => $startDate,
             'end_date' => $endDate,
