@@ -53,4 +53,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/roles', [RoleController::class, 'index'])
         ->name('roles.index');
+
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])
+        ->name('users.destroy');
 });

@@ -1,53 +1,99 @@
-document.addEventListener('DOMContentLoaded', function () {
-    'use strict';
+document.addEventListener("DOMContentLoaded", () => {
 
-    const modal = document.getElementById('roleModal');
-    const form = document.getElementById('roleForm');
+    //
+    // 1️⃣  Dropdown 3-dots menu
+    //
+    document.addEventListener("click", (e) => {
+        const btn = e.target.closest(".action-btn");
 
-    if (!modal || !form) return;
+        if (btn) {
+            const dropdown = btn.nextElementSibling;
+            document.querySelectorAll(".dropdown-menu.show")
+                .forEach(m => m !== dropdown && m.classList.remove("show"));
 
-    // Open rol modal bij klik op "Bewerken" knop
-    document.addEventListener('click', function (e) {
-        const button = e.target.closest('[data-user-id]');
-        if (button && button.dataset.userId) {
-            const userId = parseInt(button.dataset.userId);
-            const currentRoles = JSON.parse(button.dataset.userRoles || '[]');
-            openModal(userId, currentRoles);
+            dropdown.classList.toggle("show");
+            return;
+        }
+
+        if (!e.target.closest(".action-dropdown")) {
+            document.querySelectorAll(".dropdown-menu.show")
+                .forEach(m => m.classList.remove("show"));
         }
     });
 
-    // Open modal
-    function openModal(userId, currentRoles) {
-        modal.style.display = 'block';
-        form.action = `/users/${userId}/roles`;
 
-        const checkboxes = form.querySelectorAll('input[type="checkbox"][name="roles[]"]');
-        checkboxes.forEach(checkbox => {
-            const roleId = parseInt(checkbox.value);
-            checkbox.checked = currentRoles.includes(roleId);
+    //
+    // 2️⃣ - Search filter
+    //
+    const searchInput = document.querySelector("#searchUsers");
+    const roleFilter = document.querySelector("#roleFilter");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", () =>
+            filterUsers(searchInput.value.toLowerCase(), roleFilter.value.toLowerCase())
+        );
+    }
+
+    if (roleFilter) {
+        roleFilter.addEventListener("change", () =>
+            filterUsers(searchInput.value.toLowerCase(), roleFilter.value.toLowerCase())
+        );
+    }
+
+    function filterUsers(searchValue, roleValue) {
+        document.querySelectorAll(".user-row").forEach(row => {
+            const name = row.dataset.name;
+            const email = row.dataset.email;
+            const roles = row.dataset.roles;
+
+            const matchesSearch =
+                name.includes(searchValue) || email.includes(searchValue);
+
+            const matchesRole =
+                roleValue === "all" || roles.includes(roleValue);
+
+            row.style.display = (matchesSearch && matchesRole) ? "" : "none";
         });
     }
 
-    // Sluit modal
-    function closeModal() {
-        modal.style.display = 'none';
-    }
 
-    // Close button
-    const closeButton = document.getElementById('closeModalBtn');
-    if (closeButton) {
-        closeButton.addEventListener('click', closeModal);
-    }
+    //
+    // 3️⃣ Rollen wijzig-modal open & checkboxes selecteren
+    //
+    document.querySelectorAll(".editRoleBtn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            let modal = document.getElementById("roleModal");
+            let userId = btn.dataset.user;
+            let row = btn.closest("tr");
+            let roles = row.dataset.roles.split(",");
 
-    // Click buiten modal
-    modal.addEventListener('click', function (e) {
-        if (e.target === modal) closeModal();
+            document.querySelectorAll("#roleForm input[type='checkbox']")
+                .forEach(cb => {
+                    const label = cb.nextSibling.textContent.trim().toLowerCase();
+                    cb.checked = roles.includes(label);
+                });
+
+            document.getElementById("roleForm").action = `/users/${userId}/roles`;
+
+            modal.classList.remove("hidden");
+        });
     });
 
-    // Escape toets
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && modal.style.display === 'block') {
-            closeModal();
+
+    //
+    // 4️⃣ Modal sluiten als je buiten klikt
+    //
+    document.addEventListener("click", (e) => {
+        let modal = document.getElementById("roleModal");
+        if (!modal.classList.contains("hidden")) {
+            if (!e.target.closest(".modal-box") && !e.target.closest(".editRoleBtn")) {
+                modal.classList.add("hidden");
+            }
         }
     });
+
 });
+
+function closeRoleModal() {
+    document.getElementById("roleModal").classList.add("hidden");
+}

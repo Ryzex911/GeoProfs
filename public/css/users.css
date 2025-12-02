@@ -1,0 +1,352 @@
+.page-container {
+    padding: 20px;
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.btn-dashboard {
+    background: #0E3A5B;
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.filters-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.search-input, .filter-select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #D2D6DC;
+}
+
+.users-table-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+    padding: 14px;
+    text-align: left;
+}
+
+.badge.role {
+    background: #C6E0FF;
+    color: #00488C;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+.action-btn {
+    font-size: 22px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.action-col {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 25px;
+    background: white;
+    box-shadow: 0 4px 14px rgba(0,0,0,.15);
+    list-style: none;
+    padding: 6px 0;
+    border-radius: 8px;
+    width: 150px;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 10px 14px;
+    display: block;
+    text-decoration: none;
+    color: black;
+}
+
+.dropdown-item:hover {
+    background: #EEE;
+}
+
+.text-danger {
+    color: #b30000;
+}
+.role-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+}
+
+.role-modal.hidden {
+    display: none;
+}
+
+.modal-box {
+    background: #fff;
+    width: 420px;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 28px rgba(0,0,0,.25);
+    animation: fadeIn .2s ease-out;
+}
+
+.checkbox-group {
+    margin: 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-save {
+    background: #0E3A5B;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background: #ccc;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* --- Dropdown Menu Buttons Styling --- */
+.dropdown-menu button.dropdown-item {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+    color: #111;
+}
+
+.dropdown-menu button.dropdown-item:hover {
+    background: #f4f7fa;
+}
+
+/* Danger button styling */
+.dropdown-menu .text-danger {
+    color: #c03737;
+}
+
+.dropdown-menu .text-danger:hover {
+    background: rgba(255, 0, 0, 0.12);
+}
+
+/* --- Modal Styling --- */
+#roleModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    z-index: 999;
+}
+
+#roleModal:not(.hidden) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-box {
+    background: #ffffff;
+    width: 420px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 30px rgba(0,0,0,.25);
+}
+
+.modal-box h3 {
+    margin-top: 0;
+    color: #0E3A5B;
+}
+
+/* Checkboxes list */
+.role-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 14px 0;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Modal Action Buttons */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-save {
+    background: #0E3A5B;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-save:hover {
+    background: #12476c;
+}
+
+.btn-cancel {
+    background: #cccccc;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background: #b8b8b8;
+}
+
+
+/* =============== RESPONSIVE DESIGN =============== */
+@media (max-width: 992px) {
+    .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .btn-dashboard {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table th,
+    .users-table td {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .users-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .action-btn {
+        font-size: 20px;
+        padding: 4px;
+    }
+
+    .badge.role {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+
+    .page-title {
+        font-size: 20px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar {
+        padding: 0 12px;
+    }
+
+    .filters-row {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filters-row input,
+    .filter-select {
+        width: 100%;
+    }
+
+    .avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    /* Hide checkbox column to save space */
+    .users-table td:first-child,
+    .users-table th:first-child {
+        display: none;
+    }
+
+    /* Make table scrollable but still clean */
+    .users-table {
+        font-size: 13px;
+    }
+
+    .dropdown-menu {
+        right: 0;
+        left: auto;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 420px) {
+    .users-table td,
+    .users-table th {
+        padding: 6px;
+    }
+
+    .modal-box {
+        width: 90%;
+    }
+}
