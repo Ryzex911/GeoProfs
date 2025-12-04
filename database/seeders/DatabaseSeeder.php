@@ -13,8 +13,11 @@ class DatabaseSeeder extends Seeder
     {
         // Roep de UserSeeder aan (maakt o.a. Tawfik aan)
         $this->call([
-            UserSeeder::class,
             RoleSeeder::class,
+        ]);
+
+        $this->call([
+            UserSeeder::class,
         ]);
     }
 }

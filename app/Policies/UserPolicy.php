@@ -23,4 +23,12 @@ class UserPolicy
     {
         return $user->hasRole('admin');
     }
+
+
+    public function accessAdmin(User $user): bool
+    {
+        return $user->hasRole('admin');
+    }
+
+
 }

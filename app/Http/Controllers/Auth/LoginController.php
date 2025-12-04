@@ -87,6 +87,16 @@ class LoginController extends Controller
         }
     }
 
+    protected function authenticated($request, $user)
+    {
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('dashboard');
+    }
+
+
     public function logout(Request $request): RedirectResponse
     {
         auth()->logout();

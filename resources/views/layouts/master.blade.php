@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/users.css">
+    @yield('page-css')
 </head>
 
 <body>

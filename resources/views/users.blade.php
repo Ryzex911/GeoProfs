@@ -58,7 +58,9 @@
                                 <button class="action-btn">⋮</button>
 
                                 <ul class="dropdown-menu">
+                                    @can('updateRoles', $user)
                                     <li><button class="dropdown-item editRoleBtn" data-user="{{ $user->id }}">Rollen wijzigen</button></li>
+                                    @endcan
                                     <li><a class="dropdown-item" href="#">Profiel bewerken</a></li>
                                     <li><a class="dropdown-item text-danger" href="#">Verwijderen</a></li>
                                 </ul>

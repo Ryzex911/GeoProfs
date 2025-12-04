@@ -25,6 +25,9 @@ class UserController extends Controller
         return view('users', compact('users', 'allRoles'));
     }
 
+
+
+
     // Users rollen wijzigen
     public function updateUserRoles(Request $request, User $user): RedirectResponse
     {
