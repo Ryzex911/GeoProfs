@@ -7,32 +7,31 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeaveRequest extends Model
 {
-    protected $table = 'leave_requests';
+use HasFactory;
 
-    use HasFactory;
+protected $table = 'leave_requests';
 
-    protected $fillable = [
-        'employee_id',
-        'manager_id',
-        'type',
-        'reason',
-        'start_date',
-        'end_date',
-        'status',
-        'submitted_at',
-        'approved_at',
-        'canceled_at',
-        'notification_sent',
-    ];
+protected $fillable = [
+    'manager_id',
+    'type',
+    'reason',
+    'status',
+];
 
-    public function employee()
-    {
-        return $this->belongsTo(User::class, 'employee_id');
-    }
+// Casts zodat we makkelijk met datums / booleans kunnen werken
+protected $casts = [
+    'start_date' => 'datetime',
+    'end_date' => 'datetime',
+    'submitted_at' => 'datetime',
+    'approved_at' => 'datetime',
+    'canceled_at' => 'datetime',
+    'notification_sent' => 'boolean',
+];
 
-    public function manager()
-    {
-        return $this->belongsTo(User::class, 'manager_id');
-    }
+public function employee()
+{
+    return $this->belongsTo(User::class, 'employee_id');
+}
+
 
 }

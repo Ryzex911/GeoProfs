@@ -357,22 +357,81 @@
         });
     });
 
-    /* ========== SUBMIT / RESET (mock) ========== */
-    const toast = document.getElementById('toast');
-    document.getElementById('submitBtn').addEventListener('click', ()=>{
-        toast.classList.add('show');
-        setTimeout(()=>toast.classList.remove('show'), 2200);
-    });
+   /* ========== SUBMIT / RESET (AJAX) ========== */
+const toast = document.getElementById('toast');
+const storeUrl = "{{ route('leave-requests.store') }}"; // Laravel route
 
-    document.getElementById('resetBtn').addEventListener('click', ()=>{
-        from.value = "";
-        to.value   = "";
-        document.getElementById('overig').value = "";
-        rangeStart = null;
-        rangeEnd   = null;
-        validate();
-        renderRange();
-    });
+document.getElementById('submitBtn').addEventListener('click', async () => {
+    // Verzamel waarden
+    const type = document.querySelector('.tile.is-selected')?.dataset.reason || 'Vakantie';
+    const fromVal = from.value; // datetime-local: 'YYYY-MM-DDTHH:MM'
+    const toVal = to.value;
+    const reason = document.getElementById('overig').value || document.getElementById('overig')?.placeholder || null;
+    const note = document.getElementById('note')?.value || null;
+
+    // Basic UI feedback / disable button
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verzenden…';
+
+    try {
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const res = await fetch(storeUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                type: type,
+                from: fromVal,
+                to: toVal,
+                reason: reason,
+                note: note
+            })
+        });
+
+        if (res.status === 201 || res.ok) {
+            // success
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2200);
+
+            // optioneel: reset form / range
+            from.value = "";
+            to.value = "";
+            document.getElementById('overig').value = "";
+            rangeStart = null;
+            rangeEnd = null;
+            validate();
+            renderRange();
+        } else if (res.status === 422) {
+            const payload = await res.json();
+            const errors = payload.errors || payload;
+            // Toon eenvoudige alerts (je kunt dit uitbreiden naar per-field UI)
+            alert('Validatie fouten: ' + JSON.stringify(errors));
+        } else {
+            const payload = await res.json().catch(()=>null);
+            alert('Fout bij opslaan: ' + (payload?.message || res.statusText));
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Er is een fout opgetreden bij het versturen.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Verzoek indienen';
+    }
+});
+
+// reset blijft hetzelfde (optioneel)
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+    from.value = "";
+    to.value   = "";
+    document.getElementById('overig').value = "";
+    rangeStart = null;
+    rangeEnd   = null;
+    validate();
+    renderRange();
+});
 
     // eerste run
     validate();
