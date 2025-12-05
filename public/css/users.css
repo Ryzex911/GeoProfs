@@ -97,6 +97,11 @@
 .text-danger {
     color: #b30000;
 }
+
+.text-success {
+    color: #28a745;
+}
+
 .role-modal {
     position: fixed;
     inset: 0;

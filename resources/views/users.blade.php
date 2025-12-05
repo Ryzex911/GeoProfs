@@ -1,6 +1,14 @@
 @extends('layouts.master')
 
 @section('content')
+    @if(session('success'))
+        <div class="text-success">{{session('success')}}</div>
+    @endif
+
+    @if (session('error'))
+
+        <div class="text-danger">{{ session('error') }}</div>
+    @endif
 
     <div class="page-container">
 

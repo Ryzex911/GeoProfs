@@ -22,6 +22,11 @@ class UserService
         return Role::all();
     }
 
+    public function getAdminRoleId(): ?int
+    {
+        return Role::where('name', 'admin')->first()?->id;
+    }
+
     // Gebruikersrollen bijwerken via privot tabel
     public function updateRoles(User $user, array $roleIds): void
     {
