@@ -2,8 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\LeaveType;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,25 +16,18 @@ class LeaveRequestFactory extends Factory
      */
     public function definition(): array
     {
-
+        // Maakt een startdatum tussen vandaag en één maand vanaf nu
         $startDate = $this->faker->dateTimeBetween('+0 days', '+1 month');
+        // Maakt een einddatum die 1 tot 29 dagen na de startdatum ligt
         $endDate = (clone $startDate)->modify('+' . rand(1, 29) . 'days');
 
-        $user = User::inRandomOrder()->first();
-        $type = LeaveType::inRandomOrder()->first();
-
         return [
-            'employee_id' => $user->id,
-            'leave_type_id' => $type->id,
+            'employee_id' => 1,
+            'leave_type_id' => rand(1, 3),
             'reason' => $this->faker->sentence(10),
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'proof' => null,
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate->format('Y-m-d'),
             'status' => 'ingediend',
-            'submitted_at' => now(),
-            'approved_at' => null,
-            'approved_by' => null,
-            'canceled_at' => null,
             'notification_sent' => false,
         ];
     }
