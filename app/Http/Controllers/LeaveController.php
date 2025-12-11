@@ -24,58 +24,100 @@ class LeaveController extends Controller
         return view('leave.index', compact('Requests'));
     }
 
-// Return the plain blade dashboard (frontend-only view)
+// Toon dashboard view (blade)
     public function dashboard()
     {
         return view('Requests.request-dashboard');
     }
 
-// Store via AJAX / JSON (frontend stuurt from/to as datetime-local strings)
+    // Opslaan via POST (AJAX of formulier)
     public function store(Request $request)
     {
         $user = Auth::user();
-
-        // Je frontend stuurt 'type', 'from', 'to', 'reason' en optioneel 'note'
+        // Accepteer 'leave_type_id' (int) of 'type' (naam). Geef voorkeur aan 'leave_type_id'.
         $data = $request->validate([
-            'type' => ['required', 'in:TVT,Vakantie,Anders'],
-            'from' => ['required', 'date'],
-            'to' => ['required', 'date', 'after_or_equal:from'],
-            'reason' => ['nullable', 'string', 'max:500'],
-            'note' => ['nullable', 'string', 'max:1000'],
+            'leave_type_id' => ['nullable', 'integer', 'exists:leave_types,id'],
+            'type' => ['nullable', 'string', 'max:100'],
+            // accepteer frontend veldnamen 'from'/'to' of 'start_date'/'end_date'
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date'],
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+            'reason' => ['nullable', 'string', 'max:255'],
+            'proof' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ]);
 
-        // Parse naar Carbon
-        $start = Carbon::parse($data['from'])->startOfDay();
-        $end = Carbon::parse($data['to'])->endOfDay();
+        // Bepaal verloftype
+        $leaveType = null;
+        if (!empty($data['leave_type_id'])) {
+            $leaveType = \App\Models\LeaveType::find($data['leave_type_id']);
+        } elseif (!empty($data['type'])) {
+            // Map frontend reden naar DB naam
+            $map = [
+                'verlof' => 'Vakantie',
+                'overig' => 'Anders',
+                'tvt' => 'TVT',
+            ];
+            $lookup = $map[strtolower($data['type'])] ?? ucfirst($data['type']);
+            $leaveType = \App\Models\LeaveType::where('name', $lookup)->first();
+            if ($leaveType) {
+                $data['leave_type_id'] = $leaveType->id;
+            }
+        }
+
+        if (!$leaveType) {
+            return response()->json(['message' => 'Ongeldig verloftype.'], 422);
+        }
+
+        // Accepteer 'start_date'/'end_date' of 'from'/'to' van frontend
+        $startInput = $data['start_date'] ?? $data['from'] ?? null;
+        $endInput = $data['end_date'] ?? $data['to'] ?? null;
+
+        if (!$startInput || !$endInput) {
+            return response()->json(['message' => 'Start- en einddatum zijn vereist.'], 422);
+        }
+
+        $start = Carbon::parse($startInput)->startOfDay();
+        $end = Carbon::parse($endInput)->endOfDay();
 
         if ($end->lt($start)) {
             return response()->json(['message' => 'Einddatum mag niet vóór startdatum zijn.'], 422);
         }
 
+        // Bedrijfsregels
         $today = Carbon::today();
-
-        // Specifieke regels: Vakantie minimaal 7 dagen van tevoren
-        if ($data['type'] === 'Vakantie') {
+        if (strtolower($leaveType->name) === 'vakantie') {
             $daysUntil = $today->diffInDays($start, false);
             if ($daysUntil < 7) {
                 return response()->json(['message' => 'Vakantie moet minimaal 7 dagen van tevoren worden aangevraagd.'], 422);
             }
         }
 
-        // Maak het record aan. In DB start_date/end_date zijn DATE-velden: sla als Y-m-d op.
+        // Bewijs verplichting
+        if ($leaveType->requires_proof ?? false) {
+            if (!$request->hasFile('proof')) {
+                return response()->json(['message' => 'Bewijs is verplicht voor dit verloftype.'], 422);
+            }
+        }
+
+        $proofPath = null;
+        if ($request->hasFile('proof')) {
+            $proofPath = $request->file('proof')->store('proofs', 'public');
+        }
+
         $leaveRequest = LeaveRequest::create([
             'employee_id' => $user->id,
-            'manager_id' => $user->manager_id ?? null,
-            'type' => $data['type'],
+            'leave_type_id' => $data['leave_type_id'],
             'reason' => $data['reason'] ?? null,
             'start_date' => $start->toDateString(),
             'end_date' => $end->toDateString(),
+            'proof' => $proofPath,
             'status' => 'ingediend',
             'submitted_at' => now(),
             'notification_sent' => false,
         ]);
 
-        Log::info('Verlofaanvraag ingediend via dashboard', ['user_id' => $user->id, 'leave_request_id' => $leaveRequest->id]);
+        Log::info('Verlofaanvraag ingediend', ['user_id' => $user->id, 'leave_request_id' => $leaveRequest->id]);
 
         return response()->json(['success' => true, 'leave_request' => $leaveRequest], 201);
     }

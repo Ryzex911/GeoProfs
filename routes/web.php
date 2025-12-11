@@ -52,6 +52,7 @@ Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
 //dit is voor het laten zien van de leave requests
 Route::middleware(['auth'])->group(function () {
     Route::get('/leave-requests', [LeaveController::class, 'index'])->name('leave-requests.index');
+    Route::post('/leave-requests', [LeaveController::class, 'store'])->name('leave-requests.store');
     Route::delete('/leave-requests/{leaveRequest}', [LeaveController::class, 'destroy'])->name('leave-requests.destroy');
 });
 

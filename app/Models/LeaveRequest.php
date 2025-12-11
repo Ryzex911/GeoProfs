@@ -22,6 +22,7 @@ protected $fillable = [
     'status',
     'submitted_at',
     'approved_at',
+    'approved_by',
     'canceled_at',
     'notification_sent',
 ];
@@ -36,7 +37,7 @@ protected $casts = [
     'notification_sent' => 'boolean',
 ];
 
-    public function user()
+    public function employee()
     {
         return $this->belongsTo(User::class, 'employee_id');
     }
