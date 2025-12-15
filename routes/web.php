@@ -39,7 +39,7 @@ Route::get('/dashboard', fn () => view('requests.dashboard'))
     ->name('dashboard');
 
 //Dit is de route naar de verlof aanvraag pagina met form en reden etc..
-Route::get('/requestdashboard', fn () => view('requests.request-dashboard'))
+Route::get('/requestdashboard', [LeaveController::class, 'dashboard'])
     ->middleware('auth')
     ->name('requestdashboard');
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');

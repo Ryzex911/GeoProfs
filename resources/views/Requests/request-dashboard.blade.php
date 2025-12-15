@@ -58,19 +58,15 @@
         <section class="card" aria-labelledby="sec-reden">
             <div class="card__header"><h2 id="sec-reden" class="card__title">Verlof reden</h2></div>
             <div class="card__body">
-                <div class="tiles" role="tablist" aria-label="Reden">
-                    <button class="tile is-selected" role="tab" aria-selected="true" data-reason="verlof">
-                        <span class="tile__title">Verlof</span>
-                        <span class="small-note">Betaald verlof / vrij</span>
-                    </button>
-                    <button class="tile" role="tab" aria-selected="false" data-reason="TVT">
-                        <span class="tile__title">TVT</span>
-                        <span class="small-note">Tijd voor tijd</span>
-                    </button>
-                    <button class="tile" role="tab" aria-selected="false" data-reason="overig">
-                        <span class="tile__title">Overig</span>
-                        <span class="small-note">Bijzonder/verlof anders</span>
-                    </button>
+                <!-- Verloftype selectbox -->
+                <div style="margin-bottom:16px;">
+                    <label for="leaveTypeSelect"><strong>Verloftype *</strong></label>
+                    <select id="leaveTypeSelect" class="input" required style="margin-top:6px;">
+                        <option value="">Kies een verloftype</option>
+                        @foreach($leaveTypes as $type)
+                            <option value="{{ $type->id }}">{{ $type->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="formgrid" style="margin-top:14px">
@@ -208,7 +204,11 @@
 
         const h = (fromDate && toDate && valid) ? hoursBetween(from.value, to.value) : 0;
         sHours.textContent = h;
-        submitBtn.disabled = !(valid && h > 0);
+
+        // Button is alleen enabled als: datums OK + verloftype gekozen
+        const leaveTypeSelect = document.getElementById('leaveTypeSelect');
+        const hasType = leaveTypeSelect.value !== '';
+        submitBtn.disabled = !(valid && h > 0 && hasType);
     }
 
     from.addEventListener('change', () => {
@@ -221,13 +221,16 @@
             to.min = minStr;
         }
         validate();
-        renderRange(); // inputs wijzigen → range updaten
+        renderRange();
     });
 
     to.addEventListener('change', () => {
         validate();
         renderRange();
     });
+
+    // Valideer als verloftype wijzigt
+    document.getElementById('leaveTypeSelect').addEventListener('change', validate);
 
     /* ========== KALENDER: MAAND / JAAR ========== */
 
@@ -362,14 +365,21 @@ const toast = document.getElementById('toast');
 const storeUrl = "{{ route('leave-requests.store') }}"; // Laravel route
 
 document.getElementById('submitBtn').addEventListener('click', async () => {
-    // Verzamel waarden
-    const type = document.querySelector('.tile.is-selected')?.dataset.reason || 'Vakantie';
+    // Haal verloftype ID uit selectbox
+    const leaveTypeSelect = document.getElementById('leaveTypeSelect');
+    const leaveTypeId = leaveTypeSelect.value;
+
+    // Controleer dat type is gekozen
+    if (!leaveTypeId) {
+        alert('Kies alstublieft een verloftype.');
+        return;
+    }
+
     const fromVal = from.value; // datetime-local: 'YYYY-MM-DDTHH:MM'
     const toVal = to.value;
-    const reason = document.getElementById('overig').value || document.getElementById('overig')?.placeholder || null;
-    const note = document.getElementById('note')?.value || null;
+    const reason = document.getElementById('overig').value || null;
 
-    // Basic UI feedback / disable button
+    // Basis feedback
     submitBtn.disabled = true;
     submitBtn.textContent = 'Verzenden…';
 
@@ -383,11 +393,10 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
                 'Accept': 'application/json',
             },
             body: JSON.stringify({
-                type: type,
+                leave_type_id: parseInt(leaveTypeId),
                 from: fromVal,
                 to: toVal,
-                reason: reason,
-                note: note
+                reason: reason
             })
         });
 

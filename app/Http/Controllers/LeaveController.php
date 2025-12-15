@@ -27,7 +27,8 @@ class LeaveController extends Controller
 // Toon dashboard view (blade)
     public function dashboard()
     {
-        return view('Requests.request-dashboard');
+        $leaveTypes = \App\Models\LeaveType::all();
+        return view('Requests.request-dashboard', compact('leaveTypes'));
     }
 
     // Opslaan via POST (AJAX of formulier)
