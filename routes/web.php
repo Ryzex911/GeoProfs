@@ -34,9 +34,10 @@ Route::middleware('2fa.pending')->group(function () {
 
 
 //Hier is de route naar de medewerker dashboard na het inloggen om zijn overzicht te zien
-Route::get('/dashboard', fn () => view('requests.dashboard'))
+Route::get('/dashboard', [LeaveController::class, 'dashboardOverview'])
     ->middleware('auth')
     ->name('dashboard');
+
 
 //Dit is de route naar de verlof aanvraag pagina met form en reden etc..
 Route::get('/requestdashboard', [LeaveController::class, 'dashboard'])
@@ -51,9 +52,21 @@ Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
 
 //dit is voor het laten zien van de leave requests
 Route::middleware(['auth'])->group(function () {
-    Route::get('/leave-requests', [LeaveController::class, 'index'])->name('leave-requests.index');
-    Route::post('/leave-requests', [LeaveController::class, 'store'])->name('leave-requests.store');
-    Route::delete('/leave-requests/{leaveRequest}', [LeaveController::class, 'destroy'])->name('leave-requests.destroy');
+
+    Route::get('/leave-requests', [LeaveController::class, 'index'])
+        ->name('leave-requests.index');
+
+    Route::post('/leave-requests', [LeaveController::class, 'store'])
+        ->name('leave-requests.store');
+
+    Route::patch('/leave-requests/{leaveRequest}/cancel',
+        [LeaveController::class, 'cancel'])
+        ->name('leave-requests.cancel');
+
+    Route::delete('/leave-requests/{leaveRequest}',
+        [LeaveController::class, 'destroy'])
+        ->name('leave-requests.destroy');
+
 });
 
 

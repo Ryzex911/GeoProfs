@@ -148,6 +148,21 @@
             background: #0b2f49;
         }
 
+        /* Logout knop (klein en rustig) */
+        .btn-logout {
+            background: #e5e7eb;
+            color: #0f172a;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 0;        /* belangrijk: niet naar beneden duwen */
+        }
+
+        .btn-logout:hover {
+            background: #d1d5db;
+        }
+
+
         /* Responsive */
         @media (max-width: 900px) {
             .sidebar { display: none; }
@@ -168,9 +183,15 @@
         <h2>Welkom, medewerker </h2>
 
         <div class="userbox">
-            <span>Tawfik</span>
+            <span>{{ auth()->user()->name }}</span>
             <img src="https://i.pravatar.cc/150?img=12">
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-logout">Uitloggen</button>
+            </form>
         </div>
+
     </div>
 
     <!-- Content -->
@@ -185,7 +206,9 @@
 
             <div class="card">
                 <h3>Lopende aanvragen</h3>
-                <div class="kpi">03</div>
+                <div class="kpi">
+                    {{ str_pad($lopendeAanvragen, 2, '0', STR_PAD_LEFT) }}
+                </div>
             </div>
 
 
@@ -206,7 +229,9 @@
             <div class="card">
                 <h3>mijn aanvragen</h3>
                 <p>bekijk je aanvragen.</p>
-                <button class="btn" id="goToLeave">mijn verlof verzoek</button>
+                <form method="GET" action="{{ route('leave-requests.index') }}">
+                    <button class="btn">mijn verlof verzoek</button>
+                </form>
             </div>
             <div class="card">
                 <h3>Ziek melden</h3>
@@ -215,10 +240,7 @@
             </div>
         </div>
 
-        <form method="post" action="{{ route('logout') }}" style="display:inline;">
-            @csrf
-            <button class="btn" id="goToLeave">logout</button>
-        </form>
+
     </div>
 
 </div>

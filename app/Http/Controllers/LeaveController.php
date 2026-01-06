@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
+
 class LeaveController extends Controller
 {
 // overzicht (Inertia)
@@ -128,12 +129,55 @@ class LeaveController extends Controller
         $user = Auth::user();
 
         if ($leaveRequest->employee_id !== $user->id) {
-            abort(403, 'Unauthorized');
+            abort(403, 'Geen toegang');
         }
 
+        if ($leaveRequest->status !== 'geannuleerd') {
+            return redirect()->back();
+        }
+
+        // Soft delete
         $leaveRequest->delete();
 
         return redirect()->route('leave-requests.index')
-            ->with('success', 'Verlofaanvraag succesvol verwijderd.');
+            ->with('success', 'Verlofaanvraag verwijderd.');
     }
+
+
+    // Annuleer een verlofaanvraag
+    public function cancel(LeaveRequest $leaveRequest)
+    {
+        $user = Auth::user();
+
+        // Beveiliging: alleen eigen aanvraag
+        if ($leaveRequest->employee_id !== $user->id) {
+            abort(403, 'Geen toegang');
+        }
+
+        // Alleen annuleren als status ingediend is
+        if ($leaveRequest->status !== 'ingediend') {
+            return redirect()->back();
+        }
+
+        $leaveRequest->status = 'geannuleerd';
+        $leaveRequest->save();
+
+        return redirect()->back()
+            ->with('success', 'Verlofaanvraag is geannuleerd.');
+    }
+
+// Dashboard overzicht (KPI's)
+    public function dashboardOverview()
+    {
+        $user = Auth::user();
+
+        // Aantal lopende aanvragen van deze gebruiker
+        $lopendeAanvragen = LeaveRequest::where('employee_id', $user->id)
+            ->where('status', 'ingediend')
+            ->count();
+
+        return view('requests.dashboard', compact('lopendeAanvragen'));
+    }
+
+
 }

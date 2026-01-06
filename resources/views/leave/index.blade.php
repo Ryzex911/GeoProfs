@@ -1,76 +1,136 @@
-<!doctype html>
+
+
+    <!doctype html>
 <html lang="nl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Verlof aanvragen — GeoProfs</title>
+    <meta charset="utf-8">
+    <title>Leave Requests – GeoProfs</title>
+
+    {{-- Font --}}
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    {{-- CSS --}}
     <link rel="stylesheet" href="{{ asset('css/request-dashboard.css') }}">
 </head>
 
 <body>
-<div style="max-width: 900px; margin: 40px auto; font-family: sans-serif;">
-    <h1 style="margin-bottom: 20px;">Leave Requests</h1>
 
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-        <tr style="background: #eee;">
-            <th style="padding: 8px; border: 1px solid #ddd;">Employee</th>
-            <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
-            <th style="padding: 8px; border: 1px solid #ddd;">Period</th>
-            <th style="padding: 8px; border: 1px solid #ddd;">Status</th>
-            <th style="padding: 8px; border: 1px solid #ddd;">Reason</th>
-            <th style="padding: 8px; border: 1px solid #ddd;">Actions</th>
-        </tr>
-        </thead>
+{{-- ========================= --}}
+{{-- NAVBAR (hardcoded)       --}}
+{{-- ========================= --}}
+<div class="topbar">
 
-        <tbody>
-        @foreach ($Requests as $req)
-            <tr>
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    {{ $req->employee->name ?? 'Unknown' }}
-                </td>
+    {{-- Terug naar dashboard --}}
+    <a href="{{ route('dashboard') }}" class="btn btn-secondary">
+        ← Dashboard
+    </a>
 
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    {{ $req->leaveType->name ?? 'Unknown' }}
-                </td>
-
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    {{ $req->start_date->format('d-m-Y') }}
-                    →
-                    {{ $req->end_date->format('d-m-Y') }}
-                </td>
-
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    {{ ucfirst($req->status) }}
-                </td>
-
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    {{ $req->reason }}
-                </td>
-
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    <button style="padding: 5px 10px; cursor: pointer;">View</button>
-                </td>
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    <form action="{{ route('leave-requests.destroy', $req->id) }}" method="POST" style="display:inline-block;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                                onclick="return confirm('Weet je zeker dat je deze aanvraag wilt verwijderen?')"
-                                style="padding: 5px 10px; cursor: pointer; background-color: red; color: white; border: none;">
-                            Verwijderen
-                        </button>
-                    </form>
-
-                    <!-- Optioneel: View knop -->
-                    <button style="padding: 5px 10px; cursor: pointer;">View</button>
-                </td>
-
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
+    {{-- Profiel (klikbaar voor later) --}}
+    <div class="userbox">
+        <span>{{ auth()->user()->name ?? 'Gebruiker' }}</span>
+        <a href="#">
+            <img src="https://i.pravatar.cc/100" alt="Profiel">
+        </a>
+    </div>
 </div>
+
+{{-- ========================= --}}
+{{-- PAGINA INHOUD            --}}
+{{-- ========================= --}}
+<div class="container">
+
+    <div class="card">
+        <div class="card__header">
+            <h1 class="card__title">Leave Requests</h1>
+        </div>
+
+        <div class="card__body">
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Type</th>
+                    <th>Periode</th>
+                    <th>Status</th>
+                    <th>Reden</th>
+                    <th>Acties</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                @foreach ($Requests as $req)
+                    <tr>
+
+                        <td>{{ $req->employee->name ?? 'Onbekend' }}</td>
+
+                        <td>{{ $req->leaveType->name ?? 'Onbekend' }}</td>
+
+                        <td>
+                            {{ $req->start_date->format('d-m-Y') }}
+                            →
+                            {{ $req->end_date->format('d-m-Y') }}
+                        </td>
+
+                        <td>
+                            <span class="status status-{{ $req->status }}">
+                                {{ ucfirst($req->status) }}
+                            </span>
+                        </td>
+
+                        <td class="reason">
+                            {{ $req->reason ?: 'Geen reden' }}
+                        </td>
+
+                        <td class="actions">
+
+                            {{-- ALS STATUS = INGEDIEND --}}
+                            @if ($req->status === 'ingediend')
+
+                                {{-- Annuleer knop --}}
+                                <form action="{{ route('leave-requests.cancel', $req->id) }}"
+                                      method="POST">
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <button type="submit"
+                                            class="btn btn-danger"
+                                            onclick="return confirm('Weet je zeker dat je deze aanvraag wilt annuleren?')">
+                                        Annuleren
+                                    </button>
+                                </form>
+
+                                {{-- ALS STATUS = GEANNULEERD --}}
+                            @elseif ($req->status === 'geannuleerd')
+
+                                {{-- Soft delete --}}
+                                <form action="{{ route('leave-requests.destroy', $req->id) }}"
+                                      method="POST">
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit"
+                                            class="btn btn-secondary"
+                                            onclick="return confirm('Weet je zeker dat je deze aanvraag wilt verwijderen?')">
+                                        Verwijderen
+                                    </button>
+                                </form>
+
+                            @else
+                                <span class="small-note">Geen acties</span>
+                            @endif
+
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
 </body>
 </html>
