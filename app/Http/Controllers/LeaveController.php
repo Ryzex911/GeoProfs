@@ -57,29 +57,7 @@ class LeaveController extends Controller
         if (!$leaveType) {
             return response()->json(['message' => 'Ongeldig verloftype.'], 422);
         }
-
-        // Accepteer 'start_date'/'end_date' of 'from'/'to' van frontend
-        $startInput = $data['start_date'] ?? $data['from'] ?? null;
-        $endInput = $data['end_date'] ?? $data['to'] ?? null;
-
-        if (!$startInput || !$endInput) {
-            return response()->json(['message' => 'Start- en einddatum zijn vereist.'], 422);
-        }
-
-        $start = Carbon::parse($startInput)->startOfDay();
-        $end = Carbon::parse($endInput)->endOfDay();
-
-        if ($end->lt($start)) {
-            return response()->json(['message' => 'Einddatum mag niet vóór startdatum zijn.'], 422);
-        }
-
-        // Bewijs verplichting
-        if ($leaveType->requires_proof ?? false) {
-            if (!$request->hasFile('proof')) {
-                return response()->json(['message' => 'Bewijs is verplicht voor dit verloftype.'], 422);
-            }
-        }
-
+        
         $proofPath = null;
         if ($request->hasFile('proof')) {
             $proofPath = $request->file('proof')->store('proofs', 'public');

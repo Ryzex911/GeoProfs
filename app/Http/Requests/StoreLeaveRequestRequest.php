@@ -17,6 +17,15 @@ class StoreLeaveRequestRequest extends FormRequest
         return auth()->check();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'start_date' => $this->input('start_date') ?? $this->input('from'),
+            'end_date' => $this->input('end_date') ?? $this->input('to'),
+        ]);
+    }
+
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -40,7 +49,8 @@ class StoreLeaveRequestRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             $this->validateVacationRule($validator);
-//            $this->validateProofRequirement($validator);
+            $this->validateProofRule($validator);
+
         });
     }
 
@@ -57,7 +67,7 @@ class StoreLeaveRequestRequest extends FormRequest
 
         if (strtolower($leaveType->name) === 'vakantie') {
             $daysUntil = $today->diffInDays($start, false);
-            if ($daysUntil < 30) {
+            if ($daysUntil < 7) {
                 $validator->errors()->add(
                     'start_date',
                     'Vakantie moet minimaal 7 dagen van tevoren worden aangevraagd.'
@@ -66,5 +76,15 @@ class StoreLeaveRequestRequest extends FormRequest
         }
 
 
+    }
+
+    private function validateProofRule($validator)
+    {
+        $leaveType = LeaveType::find($this->input('leave_type_id'));
+        if (!$leaveType) return;
+
+        if (($leaveType->requires_proof ?? false) && !$this->hasFile('proof')) {
+            $validator->errors()->add('proof', 'Bewijs is verplicht voor dit verloftype.');
+        }
     }
 }
