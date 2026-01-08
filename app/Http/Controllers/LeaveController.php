@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreLeaveRequestRequest;
 use App\Models\LeaveRequest;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
-use Inertia\Inertia;
-use Inertia\Response;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 
 class LeaveController extends Controller
@@ -33,21 +30,11 @@ class LeaveController extends Controller
     }
 
     // Opslaan via POST (AJAX of formulier)
-    public function store(Request $request)
+    public function store(StoreLeaveRequestRequest $request)
     {
         $user = Auth::user();
         // Accepteer 'leave_type_id' (int) of 'type' (naam). Geef voorkeur aan 'leave_type_id'.
-        $data = $request->validate([
-            'leave_type_id' => ['nullable', 'integer', 'exists:leave_types,id'],
-            'type' => ['nullable', 'string', 'max:100'],
-            // accepteer frontend veldnamen 'from'/'to' of 'start_date'/'end_date'
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date'],
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
-            'reason' => ['nullable', 'string', 'max:255'],
-            'proof' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
-        ]);
+        $data = $request->validated();
 
         // Bepaal verloftype
         $leaveType = null;
@@ -84,15 +71,6 @@ class LeaveController extends Controller
 
         if ($end->lt($start)) {
             return response()->json(['message' => 'Einddatum mag niet vóór startdatum zijn.'], 422);
-        }
-
-        // Bedrijfsregels
-        $today = Carbon::today();
-        if (strtolower($leaveType->name) === 'vakantie') {
-            $daysUntil = $today->diffInDays($start, false);
-            if ($daysUntil < 7) {
-                return response()->json(['message' => 'Vakantie moet minimaal 7 dagen van tevoren worden aangevraagd.'], 422);
-            }
         }
 
         // Bewijs verplichting
