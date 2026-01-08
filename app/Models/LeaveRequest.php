@@ -5,15 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LeaveRequest extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table = 'leave_requests';
 
-    // Velden die mass assignable zijn
     protected $fillable = [
         'employee_id',
         'leave_type_id',
@@ -29,7 +27,6 @@ class LeaveRequest extends Model
         'notification_sent',
     ];
 
-    // Datums en booleans automatisch omzetten
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
@@ -39,27 +36,39 @@ class LeaveRequest extends Model
         'notification_sent' => 'boolean',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relaties
-    |--------------------------------------------------------------------------
-    */
+    // Status constants
+    const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_CANCELED = 'canceled';
 
-    // De medewerker die het verlof heeft aangevraagd
+    // Relaties
     public function employee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'employee_id');
     }
 
-    // Het type verlof (vakantie, ziek, etc.)
     public function leaveType(): BelongsTo
     {
         return $this->belongsTo(LeaveType::class, 'leave_type_id');
     }
 
-    // De gebruiker die het verlof heeft goedgekeurd
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    // Scope voor pending requests
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    // Annuleren
+    public function cancel()
+    {
+        $this->status = self::STATUS_CANCELED;
+        $this->canceled_at = now();
+        $this->save();
     }
 }

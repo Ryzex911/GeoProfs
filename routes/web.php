@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\LeaveController;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\LeaveApprovalController;
 
 Route::redirect('/', '/login');
 
@@ -68,6 +69,16 @@ Route::middleware(['auth'])->group(function () {
         ->name('leave-requests.destroy');
 
 });
+
+
+Route::get('/admin/leave-requests', [LeaveApprovalController::class, 'index'])
+    ->name('admin.leave-requests.index');
+
+Route::post('/admin/leave-requests/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])
+    ->name('admin.leave-requests.approve');
+
+Route::post('/admin/leave-requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])
+    ->name('admin.leave-requests.reject');
 
 
 
