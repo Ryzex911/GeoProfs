@@ -13,7 +13,7 @@ $requests = LeaveRequest::pending()
 ->latest()
 ->get();
 
-return view('admin.leave-requests.index', [
+return view('Requests.manager-dashboard', [
 'requests' => $requests,
 ]);
 }
