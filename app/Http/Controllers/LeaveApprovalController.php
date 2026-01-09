@@ -15,13 +15,14 @@ class LeaveApprovalController extends Controller
 
         [$kpiOpen, $kpiReviewedToday, $kpiMonthTotal] = $this->kpis();
 
-        return view('Requests.manager-dashboard', [
+        return view('Requests.manager-requestsboard', [
             'requests' => $requests,
             'kpiOpen' => $kpiOpen,
             'kpiReviewedToday' => $kpiReviewedToday,
             'kpiMonthTotal' => $kpiMonthTotal,
             'isDeletedView' => false,
         ]);
+
     }
 
     public function approve(LeaveRequest $leaveRequest)
@@ -76,13 +77,14 @@ class LeaveApprovalController extends Controller
 
         [$kpiOpen, $kpiReviewedToday, $kpiMonthTotal] = $this->kpis();
 
-        return view('Requests.manager-dashboard', [
+        return view('Requests.manager-requestsboard', [
             'requests' => $requests,
             'kpiOpen' => $kpiOpen,
             'kpiReviewedToday' => $kpiReviewedToday,
             'kpiMonthTotal' => $kpiMonthTotal,
             'isDeletedView' => true,
         ]);
+
     }
 
     public function restore($id)
