@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Mail\TwoFactorCodeMail;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use App\Models\LoginAttempt;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class LoginController extends Controller
 {
@@ -27,9 +27,8 @@ class LoginController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        // Checkt of een user geblokkeerd is
         $user = User::where('email', $credentials['email'])->first();
-
+        // Checkt of een user geblokkeerd is
         if ($user && $user->isLocked()) {
             return back()->withErrors([
                 'email' => 'Je account is tijdelijk geblokkeerd. Neem contact op met ICT.'
@@ -40,8 +39,7 @@ class LoginController extends Controller
 
         // Als gebruiker 3 of meer mislukte pogingen heeft → blokkeren
         if ($failedAttempts >= 3) {
-            $user->lock_at = now();
-            $user->save();
+            $user->lockNow();
 
             return back()->withErrors([
                 'email' => 'Je account is geblokkeerd. Neem contact op met ICT.',
@@ -58,7 +56,7 @@ class LoginController extends Controller
             LoginAttempt::create([
                 'user_id' => optional($user)->id,   // NULL als user niet bestaat
                 'email_tried' => $email,
-                'attempts' => 1,                     // 1 per rij (afspraak)
+                'attempts' => 1,
                 'attempted_at' => now(),
             ]);
 
@@ -88,6 +86,16 @@ class LoginController extends Controller
             ]);
         }
     }
+
+    protected function authenticated($request, $user)
+    {
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('dashboard');
+    }
+
 
     public function logout(Request $request): RedirectResponse
     {

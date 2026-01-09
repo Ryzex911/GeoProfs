@@ -37,3 +37,9 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Laravel Telescope
+/config/telescope.php
+/app/Providers/TelescopeServiceProvider.php
+/telescope
+/database/migrations/2025_11_19_180442_create_telescope_entries_table.php
