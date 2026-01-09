@@ -13,6 +13,12 @@ class LeaveRequest extends Model
 
     protected $table = 'leave_requests';
 
+    // ✅ Status constants
+    public const STATUS_PENDING  = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_CANCELED = 'canceled';
+
     // Velden die mass assignable zijn
     protected $fillable = [
         'employee_id',
@@ -29,10 +35,12 @@ class LeaveRequest extends Model
         'notification_sent',
     ];
 
-    // Datums en booleans automatisch omzetten
+    // ✅ Datums en booleans automatisch omzetten
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        // jij werkt met tijden in UI + DB, dus datetime
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
         'canceled_at' => 'datetime',
@@ -45,21 +53,61 @@ class LeaveRequest extends Model
     |--------------------------------------------------------------------------
     */
 
-    // De medewerker die het verlof heeft aangevraagd
     public function employee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'employee_id');
     }
 
-    // Het type verlof (vakantie, ziek, etc.)
     public function leaveType(): BelongsTo
     {
         return $this->belongsTo(LeaveType::class, 'leave_type_id');
     }
 
-    // De gebruiker die het verlof heeft goedgekeurd
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helpers (optioneel maar handig)
+    |--------------------------------------------------------------------------
+    */
+
+    public function cancel(): void
+    {
+        $this->update([
+            'status' => self::STATUS_CANCELED,
+            'canceled_at' => now(),
+        ]);
+    }
+
+    public function approve(?int $approverId = null): void
+    {
+        $this->update([
+            'status' => self::STATUS_APPROVED,
+            'approved_by' => $approverId,
+            'approved_at' => now(),
+        ]);
+    }
+
+    public function reject(?int $approverId = null): void
+    {
+        $this->update([
+            'status' => self::STATUS_REJECTED,
+            'approved_by' => $approverId,
+            'approved_at' => now(),
+        ]);
     }
 }

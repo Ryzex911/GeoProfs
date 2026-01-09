@@ -100,7 +100,7 @@
                 </div>
 
                 <div class="actions" style="margin-top:16px">
-                    <button class="btn btn-primary" id="submitBtn" disabled>Verzoek indienen</button>
+                    <button class="btn btn-primary" id="submitBtn">Verzoek indienen</button>
                     <button class="btn btn-secondary" id="resetBtn">Annuleren</button>
                 </div>
             </div>
@@ -120,126 +120,39 @@
 <div class="toast" id="toast" role="status" aria-live="polite"> Verlofverzoek is verzonden!</div>
 
 <script>
-    /* ========== REDEN TILES ========== */
-    const tiles = document.querySelectorAll('.tile');
-    const sReason = document.getElementById('sReason');
-    const overigWrap = document.getElementById('overigWrap');
+    /* =========================================================
+       EINDSCRIPT:
+       - Kalender (range highlight) + auto invullen from/to
+       - Submit (AJAX) + Reset
+       - Geen 1-week validatie
+       - Reason altijd meesturen (backend vereist reason)
+       ========================================================= */
 
-    tiles.forEach(t => {
-        t.addEventListener('click', () => {
-            tiles.forEach(x => {
-                x.classList.remove('is-selected');
-                x.setAttribute('aria-selected','false');
-            });
-            t.classList.add('is-selected');
-            t.setAttribute('aria-selected','true');
+    const from = document.getElementById('from');
+    const to   = document.getElementById('to');
 
-            const reason = t.dataset.reason;
-            sReason.textContent = reason.charAt(0).toUpperCase()+reason.slice(1);
-            overigWrap.style.display = (reason === 'overig') ? 'block' : 'none';
-            validate();
-        });
-    });
-
-    /* ========== DATUM / VALIDATIE ========== */
-    const from    = document.getElementById('from');
-    const to      = document.getElementById('to');
-    const sFrom   = document.getElementById('sFrom');
-    const sTo     = document.getElementById('sTo');
-    const sHours  = document.getElementById('sHours');
+    const leaveTypeSelect = document.getElementById('leaveTypeSelect');
     const submitBtn = document.getElementById('submitBtn');
+    const resetBtn  = document.getElementById('resetBtn');
 
-    // echte "nu"
-    const today = new Date();
+    const toast    = document.getElementById('toast');
+    const storeUrl = "{{ route('leave-requests.store') }}";
 
-    // minimaal 7 dagen van tevoren
-    const MIN_DAGEN_VAN_TE_VOREN = 7;
-    const minDate = new Date(today.getTime());
-    minDate.setDate(minDate.getDate() + MIN_DAGEN_VAN_TE_VOREN);
-
+    // Helper: zet Date om naar datetime-local string (YYYY-MM-DDTHH:MM)
     function toInputValue(date) {
-        // lokale tijd omzetten naar value voor datetime-local
         const off = date.getTimezoneOffset();
         const local = new Date(date.getTime() - off * 60000);
         return local.toISOString().slice(0, 16);
     }
 
-    const minStr = toInputValue(minDate);
-    from.min = minStr;
-    to.min   = minStr;
-
-    function hoursBetween(a,b){
-        const start = new Date(a), end = new Date(b);
-        const ms = end - start;
-        if (isNaN(ms) || ms <= 0) return 0;
-        return +(ms / 36e5).toFixed(2);
-    }
-
-    function validate(){
-        let valid = true;
-        const fromDate = from.value ? new Date(from.value) : null;
-        const toDate   = to.value   ? new Date(to.value)   : null;
-
-        from.classList.remove('has-error');
-        to.classList.remove('has-error');
-
-        sFrom.textContent = fromDate ? fromDate.toLocaleString() : '—';
-        sTo.textContent   = toDate   ? toDate.toLocaleString()   : '—';
-
-        // 1) minimaal 1 week van tevoren
-        if (fromDate && fromDate < minDate) {
-            valid = false;
-            from.classList.add('has-error');
-        }
-        if (toDate && toDate < minDate) {
-            valid = false;
-            to.classList.add('has-error');
-        }
-
-        // 2) tot mag niet vóór van
-        if (fromDate && toDate && toDate <= fromDate) {
-            valid = false;
-            to.classList.add('has-error');
-        }
-
-        const h = (fromDate && toDate && valid) ? hoursBetween(from.value, to.value) : 0;
-        sHours.textContent = h;
-
-        // Button is alleen enabled als: datums OK + verloftype gekozen
-        const leaveTypeSelect = document.getElementById('leaveTypeSelect');
-        const hasType = leaveTypeSelect.value !== '';
-        submitBtn.disabled = !(valid && h > 0 && hasType);
-    }
-
-    from.addEventListener('change', () => {
-        if (from.value) {
-            to.min = from.value;
-            if (to.value && to.value < from.value) {
-                to.value = from.value;
-            }
-        } else {
-            to.min = minStr;
-        }
-        validate();
-        renderRange();
-    });
-
-    to.addEventListener('change', () => {
-        validate();
-        renderRange();
-    });
-
-    // Valideer als verloftype wijzigt
-    document.getElementById('leaveTypeSelect').addEventListener('change', validate);
-
     /* ========== KALENDER: MAAND / JAAR ========== */
-
     const monthLabel = document.getElementById('monthLabel');
     const monthNames = [
         'Januari','Februari','Maart','April','Mei','Juni',
         'Juli','Augustus','September','Oktober','November','December'
     ];
 
+    const today = new Date();
     let currentYear  = today.getFullYear();
     let currentMonth = today.getMonth(); // 0–11
 
@@ -280,7 +193,6 @@
     nextBtn.addEventListener('click', goToNextMonth);
 
     /* ========== KALENDER: RANGE-SELECT ========== */
-
     const dayButtons = document.querySelectorAll('[data-day]');
     let rangeStart = null; // Date
     let rangeEnd   = null; // Date
@@ -302,13 +214,7 @@
             const d = getDateForButton(btn);
 
             // reset classes
-            btn.classList.remove('is-disabled','is-range-start','is-range-end','is-in-range');
-
-            // disable oude datums
-            if (d < minDate) {
-                btn.classList.add('is-disabled');
-                return;
-            }
+            btn.classList.remove('is-range-start','is-range-end','is-in-range');
 
             if (!rangeStart) return;
 
@@ -329,123 +235,112 @@
         btn.addEventListener('click', () => {
             const d = getDateForButton(btn);
 
-            if (d < minDate) {
-                alert('Je kunt geen verlof in het verleden of minder dan 1 week van tevoren aanvragen.');
-                return;
-            }
-
-            // Als nog geen start, of er is al start+end, of klik is vóór huidige start → nieuwe range starten
+            // start/end selection
             if (!rangeStart || (rangeStart && rangeEnd) || d < rangeStart) {
                 rangeStart = d;
                 rangeEnd   = null;
             } else {
-                // tweede klik → eind van de range
                 rangeEnd = d;
             }
 
-            // Van/Tot invullen
+            // inputs invullen
             const startForInput = setTime(rangeStart, 9);  // 09:00
             from.value = toInputValue(startForInput);
 
-            let endForInput;
-            if (rangeEnd) {
-                endForInput = setTime(rangeEnd, 17);       // 17:00
-            } else {
-                endForInput = setTime(rangeStart, 17);     // 17:00 zelfde dag
-            }
+            const endForInput = setTime(rangeEnd ?? rangeStart, 17); // 17:00
             to.value = toInputValue(endForInput);
 
-            validate();
             renderRange();
         });
     });
 
-   /* ========== SUBMIT / RESET (AJAX) ========== */
-const toast = document.getElementById('toast');
-const storeUrl = "{{ route('leave-requests.store') }}"; // Laravel route
+    renderRange();
 
-document.getElementById('submitBtn').addEventListener('click', async () => {
-    // Haal verloftype ID uit selectbox
-    const leaveTypeSelect = document.getElementById('leaveTypeSelect');
-    const leaveTypeId = leaveTypeSelect.value;
+    /* ========== SUBMIT (AJAX) + RESET ========== */
+    submitBtn.addEventListener('click', async () => {
+        const leaveTypeId = leaveTypeSelect.value;
+        if (!leaveTypeId) return alert('Kies een verloftype.');
 
-    // Controleer dat type is gekozen
-    if (!leaveTypeId) {
-        alert('Kies alstublieft een verloftype.');
-        return;
-    }
+        if (!from.value || !to.value) return alert('Kies een Van en Tot datum.');
 
-    const fromVal = from.value; // datetime-local: 'YYYY-MM-DDTHH:MM'
-    const toVal = to.value;
-    const reason = document.getElementById('overig').value || null;
-
-    // Basis feedback
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Verzenden…';
-
-    try {
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const res = await fetch(storeUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token,
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-                leave_type_id: parseInt(leaveTypeId),
-                from: fromVal,
-                to: toVal,
-                reason: reason
-            })
-        });
-
-        if (res.status === 201 || res.ok) {
-            // success
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2200);
-
-            // optioneel: reset form / range
-            from.value = "";
-            to.value = "";
-            document.getElementById('overig').value = "";
-            rangeStart = null;
-            rangeEnd = null;
-            validate();
-            renderRange();
-        } else if (res.status === 422) {
-            const payload = await res.json();
-            const errors = payload.errors || payload;
-            // Toon eenvoudige alerts (je kunt dit uitbreiden naar per-field UI)
-            alert('Validatie fouten: ' + JSON.stringify(errors));
-        } else {
-            const payload = await res.json().catch(()=>null);
-            alert('Fout bij opslaan: ' + (payload?.message || res.statusText));
+        if (new Date(to.value) <= new Date(from.value)) {
+            return alert('"Tot" moet na "Van" zijn.');
         }
-    } catch (err) {
-        console.error(err);
-        alert('Er is een fout opgetreden bij het versturen.');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Verzoek indienen';
-    }
-});
 
-// reset blijft hetzelfde (optioneel)
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-    from.value = "";
-    to.value   = "";
-    document.getElementById('overig').value = "";
-    rangeStart = null;
-    rangeEnd   = null;
-    validate();
-    renderRange();
-});
+        // Backend eist reason -> stuur altijd iets
+        const leaveTypeText = leaveTypeSelect.options[leaveTypeSelect.selectedIndex]?.text || 'Verlof';
+        const noteVal = document.getElementById('note')?.value?.trim() || '';
+        const overigVal = document.getElementById('overig')?.value?.trim() || '';
 
-    // eerste run
-    validate();
-    renderRange();
+        const reason = overigVal || noteVal || leaveTypeText;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verzenden…';
+
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            const res = await fetch(storeUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    leave_type_id: parseInt(leaveTypeId, 10),
+                    from: from.value,
+                    to: to.value,
+                    reason: reason,
+                }),
+            });
+
+            if (res.ok) {
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2200);
+
+                // reset alles
+                from.value = '';
+                to.value = '';
+                const note = document.getElementById('note');
+                if (note) note.value = '';
+                const overig = document.getElementById('overig');
+                if (overig) overig.value = '';
+
+                rangeStart = null;
+                rangeEnd = null;
+                renderRange();
+            } else if (res.status === 422) {
+                const payload = await res.json().catch(() => null);
+                alert(payload?.message || 'Validatie fout (422).');
+            } else {
+                const payload = await res.json().catch(() => null);
+                alert(payload?.message || 'Opslaan mislukt.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Fout bij versturen.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verzoek indienen';
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        from.value = '';
+        to.value = '';
+        const note = document.getElementById('note');
+        if (note) note.value = '';
+        const overig = document.getElementById('overig');
+        if (overig) overig.value = '';
+
+        rangeStart = null;
+        rangeEnd = null;
+        renderRange();
+    });
 </script>
+
+
 
 
 </body>
