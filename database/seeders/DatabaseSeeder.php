@@ -14,6 +14,10 @@ class DatabaseSeeder extends Seeder
     {
         // Roep de UserSeeder aan (maakt o.a. Tawfik aan)
         $this->call([
+            RoleSeeder::class,
+        ]);
+
+        $this->call([
             UserSeeder::class,
         ]);
         LeaveRequest::factory(3)->create();

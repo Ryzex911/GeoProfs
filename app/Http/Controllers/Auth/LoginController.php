@@ -39,8 +39,7 @@ class LoginController extends Controller
 
         // Als gebruiker 3 of meer mislukte pogingen heeft → blokkeren
         if ($failedAttempts >= 3) {
-            $user->lock_at = now();
-            $user->save();
+            $user->lockNow();
 
             return back()->withErrors([
                 'email' => 'Je account is geblokkeerd. Neem contact op met ICT.',
@@ -87,6 +86,16 @@ class LoginController extends Controller
             ]);
         }
     }
+
+    protected function authenticated($request, $user)
+    {
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('dashboard');
+    }
+
 
     public function logout(Request $request): RedirectResponse
     {

@@ -31,5 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
         LeaveRequest::observe(LeaveRequestObserver::class);
 
+
+        Gate::policy(User::class, UserPolicy::class);
     }
 }

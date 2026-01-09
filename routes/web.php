@@ -1,16 +1,21 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\LeaveController;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\LeaveApprovalController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminController;
+use Illuminate\Support\Facades\Route;
 
+// Redirect root
 Route::redirect('/', '/login');
 
+// Authentication
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
 
@@ -44,12 +49,26 @@ Route::get('/dashboard', [LeaveController::class, 'dashboardOverview'])
 Route::get('/requestdashboard', [LeaveController::class, 'dashboard'])
     ->middleware('auth')
     ->name('requestdashboard');
+
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
 //dat is de 2fa opnieuw stuur knopje methode
 Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
     ->middleware('2fa.pending')
     ->name('2fa.resend');
+
+// Users & Roles (for admin only)
+Route::middleware('auth')->group(function () {
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::put('/users/{user}/roles', [UserController::class, 'updateUserRoles'])->name('users.updateRoles');
+    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+});
+
+// Admin dashboard
+Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
+    ->middleware('auth')
+    ->name('admin.dashboard');
 
 //dit is voor het laten zien van de leave requests
 Route::middleware(['auth'])->group(function () {
