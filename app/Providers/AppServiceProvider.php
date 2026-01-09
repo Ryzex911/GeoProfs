@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use App\Models\LeaveRequest;
+use App\Observers\LeaveRequestObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +28,8 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(function () {
             return Password::min(8); // minimaal 6 tekens
         });
+
+        LeaveRequest::observe(LeaveRequestObserver::class);
+
     }
 }

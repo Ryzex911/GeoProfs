@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LeaveRequest extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'leave_requests';
 
@@ -28,8 +29,8 @@ class LeaveRequest extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'start_date' => 'datetime',   // ✅ was 'date'
+        'end_date' => 'datetime',     // ✅ was 'date'
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
         'canceled_at' => 'datetime',
@@ -37,7 +38,7 @@ class LeaveRequest extends Model
     ];
 
     // Status constants
-    const STATUS_PENDING = 'pending';
+    const STATUS_PENDING  = 'pending';
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';
     const STATUS_CANCELED = 'canceled';

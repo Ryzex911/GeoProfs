@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 
+
+
 class LeaveController extends Controller
 {
 // overzicht (Inertia)
@@ -92,7 +94,7 @@ class LeaveController extends Controller
             'start_date' => $start->toDateString(),
             'end_date' => $end->toDateString(),
             'proof' => $proofPath,
-            'status' => 'ingediend',
+            'status' => LeaveRequest::STATUS_PENDING,
             'submitted_at' => now(),
             'notification_sent' => false,
         ]);
@@ -110,9 +112,10 @@ class LeaveController extends Controller
             abort(403, 'Geen toegang');
         }
 
-        if ($leaveRequest->status !== 'geannuleerd') {
+        if ($leaveRequest->status !== LeaveRequest::STATUS_CANCELED) {
             return redirect()->back();
         }
+
 
         // Soft delete
         $leaveRequest->delete();
@@ -133,11 +136,13 @@ class LeaveController extends Controller
         }
 
         // Alleen annuleren als status ingediend is
-        if ($leaveRequest->status !== 'ingediend') {
+        if ($leaveRequest->status !== LeaveRequest::STATUS_PENDING) {
             return redirect()->back();
         }
 
-        $leaveRequest->status = 'geannuleerd';
+        $leaveRequest->status = LeaveRequest::STATUS_CANCELED;
+        $leaveRequest->canceled_at = now();
+
         $leaveRequest->save();
 
         return redirect()->back()
@@ -151,7 +156,7 @@ class LeaveController extends Controller
 
         // Aantal lopende aanvragen van deze gebruiker
         $lopendeAanvragen = LeaveRequest::where('employee_id', $user->id)
-            ->where('status', 'ingediend')
+            ->where('status', LeaveRequest::STATUS_PENDING)
             ->count();
 
         return view('requests.dashboard', compact('lopendeAanvragen'));

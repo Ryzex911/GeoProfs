@@ -82,7 +82,21 @@ Route::post('/admin/leave-requests/{leaveRequest}/reject', [LeaveApprovalControl
 
 
 
-Route::get('/manager/requests', function () {
-    return view('Requests.manager-dashboard');
-})->middleware(['auth']);
+Route::get('/manager/requests', [LeaveApprovalController::class, 'index'])
+    ->middleware('auth')
+    ->name('manager.requests.index');
+
+Route::delete('/manager/requests/{leaveRequest}', [LeaveApprovalController::class, 'hide'])
+    ->middleware('auth')
+    ->name('manager.requests.hide');
+
+Route::get('/manager/requests/deleted', [LeaveApprovalController::class, 'deleted'])
+    ->middleware('auth')
+    ->name('manager.requests.deleted');
+
+Route::post('/manager/requests/{id}/restore', [LeaveApprovalController::class, 'restore'])
+    ->middleware('auth')
+    ->name('manager.requests.restore');
+
+
 
