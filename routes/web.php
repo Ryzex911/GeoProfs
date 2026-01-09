@@ -5,7 +5,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\TwoFactorController;
-
+use App\Http\Controllers\LeaveController;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\LeaveApprovalController;
 
 Route::redirect('/', '/login');
 
@@ -31,14 +33,54 @@ Route::middleware('2fa.pending')->group(function () {
     Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 });
 
-Route::get('/dashboard', fn () => view('dashboard'))->middleware('auth')->name('dashboard');
 
+//Hier is de route naar de medewerker dashboard na het inloggen om zijn overzicht te zien
+Route::get('/dashboard', [LeaveController::class, 'dashboardOverview'])
+    ->middleware('auth')
+    ->name('dashboard');
+
+
+//Dit is de route naar de verlof aanvraag pagina met form en reden etc..
+Route::get('/requestdashboard', [LeaveController::class, 'dashboard'])
+    ->middleware('auth')
+    ->name('requestdashboard');
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
-
+//dat is de 2fa opnieuw stuur knopje methode
 Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
     ->middleware('2fa.pending')
     ->name('2fa.resend');
+
+//dit is voor het laten zien van de leave requests
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/leave-requests', [LeaveController::class, 'index'])
+        ->name('leave-requests.index');
+
+    Route::post('/leave-requests', [LeaveController::class, 'store'])
+        ->name('leave-requests.store');
+
+    Route::patch('/leave-requests/{leaveRequest}/cancel',
+        [LeaveController::class, 'cancel'])
+        ->name('leave-requests.cancel');
+
+    Route::delete('/leave-requests/{leaveRequest}',
+        [LeaveController::class, 'destroy'])
+        ->name('leave-requests.destroy');
+
+});
+
+
+Route::get('/admin/leave-requests', [LeaveApprovalController::class, 'index'])
+    ->name('admin.leave-requests.index');
+
+Route::post('/admin/leave-requests/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])
+    ->name('admin.leave-requests.approve');
+
+Route::post('/admin/leave-requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])
+    ->name('admin.leave-requests.reject');
+
+
 
 Route::get('/manager/requests', function () {
     return view('Requests.manager-requestsboard');

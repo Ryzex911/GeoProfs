@@ -4,8 +4,8 @@ import { fetchLatest2faCode } from './helpers/fetchLatest2faCode.js';
 test('kan inloggen + 2FA naar dashboard', async ({ page }) => {
     await page.goto('/login');
 
-    await page.locator('input[name="email"]').fill('medewerker.e2e@example.test');
-    await page.locator('input[name="password"]').fill('Secret123!');
+    await page.locator('input[name="email"]').fill('ryzexgamer1@gmail.com');
+    await page.locator('input[name="password"]').fill('Ryzex2028@@@@');
     const loginBtn = page.getByRole('button', { name: /inloggen|login/i });
     (await loginBtn.count()) ? await loginBtn.click() : await page.locator('button[type="submit"]').click();
 
