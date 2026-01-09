@@ -35,52 +35,11 @@ class LeaveController extends Controller
     public function store(StoreLeaveRequestRequest $request)
     {
         $user = Auth::user();
-        // Accepteer 'leave_type_id' (int) of 'type' (naam). Geef voorkeur aan 'leave_type_id'.
+        // StoreLeaveRequest wordt gebruikt om bedrijfsregels te valideren
         $data = $request->validated();
 
-        // Bepaal verloftype
-        $leaveType = null;
-        if (!empty($data['leave_type_id'])) {
-            $leaveType = \App\Models\LeaveType::find($data['leave_type_id']);
-        } elseif (!empty($data['type'])) {
-            // Map frontend reden naar DB naam
-            $map = [
-                'verlof' => 'Vakantie',
-                'overig' => 'Anders',
-                'tvt' => 'TVT',
-            ];
-            $lookup = $map[strtolower($data['type'])] ?? ucfirst($data['type']);
-            $leaveType = \App\Models\LeaveType::where('name', $lookup)->first();
-            if ($leaveType) {
-                $data['leave_type_id'] = $leaveType->id;
-            }
-        }
-
-        if (!$leaveType) {
-            return response()->json(['message' => 'Ongeldig verloftype.'], 422);
-        }
-
-        // Accepteer 'start_date'/'end_date' of 'from'/'to' van frontend
-        $startInput = $data['start_date'] ?? $data['from'] ?? null;
-        $endInput = $data['end_date'] ?? $data['to'] ?? null;
-
-        if (!$startInput || !$endInput) {
-            return response()->json(['message' => 'Start- en einddatum zijn vereist.'], 422);
-        }
-
-        $start = Carbon::parse($startInput)->startOfDay();
-        $end = Carbon::parse($endInput)->endOfDay();
-
-        if ($end->lt($start)) {
-            return response()->json(['message' => 'Einddatum mag niet vóór startdatum zijn.'], 422);
-        }
-
-        // Bewijs verplichting
-        if ($leaveType->requires_proof ?? false) {
-            if (!$request->hasFile('proof')) {
-                return response()->json(['message' => 'Bewijs is verplicht voor dit verloftype.'], 422);
-            }
-        }
+        $start = Carbon::parse($data['start_date']);
+        $end = Carbon::parse($data['end_date']);
 
         $proofPath = null;
         if ($request->hasFile('proof')) {
@@ -88,7 +47,7 @@ class LeaveController extends Controller
         }
 
         $leaveRequest = LeaveRequest::create([
-            'employee_id' => $user->id,
+            'employee_id' => Auth::id(),
             'leave_type_id' => $data['leave_type_id'],
             'reason' => $data['reason'] ?? null,
             'start_date' => $start->toDateString(),

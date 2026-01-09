@@ -13,6 +13,7 @@ class LeaveRequest extends Model
 
     protected $table = 'leave_requests';
 
+    // Velden die mass assignable zijn
     protected $fillable = [
         'employee_id',
         'leave_type_id',
@@ -29,8 +30,8 @@ class LeaveRequest extends Model
     ];
 
     protected $casts = [
-        'start_date' => 'datetime',   // ✅ was 'date'
-        'end_date' => 'datetime',     // ✅ was 'date'
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
         'canceled_at' => 'datetime',
@@ -49,27 +50,58 @@ class LeaveRequest extends Model
         return $this->belongsTo(User::class, 'employee_id');
     }
 
+    // Het type verlof (vakantie, ziek, etc.)
     public function leaveType(): BelongsTo
     {
         return $this->belongsTo(LeaveType::class, 'leave_type_id');
     }
 
+    // De gebruiker die het verlof heeft goedgekeurd
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
 
-    // Scope voor pending requests
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
     public function scopePending($query)
     {
         return $query->where('status', self::STATUS_PENDING);
     }
 
-    // Annuleren
-    public function cancel()
+    /*
+    |--------------------------------------------------------------------------
+    | Helpers (optioneel maar handig)
+    |--------------------------------------------------------------------------
+    */
+
+    public function cancel(): void
     {
-        $this->status = self::STATUS_CANCELED;
-        $this->canceled_at = now();
-        $this->save();
+        $this->update([
+            'status' => self::STATUS_CANCELED,
+            'canceled_at' => now(),
+        ]);
+    }
+
+    public function approve(?int $approverId = null): void
+    {
+        $this->update([
+            'status' => self::STATUS_APPROVED,
+            'approved_by' => $approverId,
+            'approved_at' => now(),
+        ]);
+    }
+
+    public function reject(?int $approverId = null): void
+    {
+        $this->update([
+            'status' => self::STATUS_REJECTED,
+            'approved_by' => $approverId,
+            'approved_at' => now(),
+        ]);
     }
 }
