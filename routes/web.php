@@ -41,6 +41,10 @@ Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
     ->name('2fa.resend');
 
 Route::get('/manager/requests', function () {
-    return view('Requests.manager-dashboard');
+    return view('Requests.manager-requestsboard');
+})->middleware(['auth']);
+
+Route::get('/manager/dashboard', function () {
+    return view('Manager.Manager-dashboard');
 })->middleware(['auth']);
 
