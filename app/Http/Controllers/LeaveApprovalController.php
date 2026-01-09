@@ -9,9 +9,14 @@ class LeaveApprovalController extends Controller
 {
     public function index()
     {
-        $requests = LeaveRequest::with(['employee', 'leaveType'])
+        $requests = LeaveRequest::whereIn('status', [
+            LeaveRequest::STATUS_PENDING,
+            LeaveRequest::STATUS_CANCELED,
+        ])
+            ->with(['employee', 'leaveType'])
             ->latest('submitted_at')
             ->get();
+
 
         [$kpiOpen, $kpiReviewedToday, $kpiMonthTotal] = $this->kpis();
 

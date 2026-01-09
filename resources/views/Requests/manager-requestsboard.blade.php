@@ -184,36 +184,25 @@
                         </td>
 
                         <td class="actions-cell">
-                            @if($isDeletedView)
-                                {{-- Deleted view: alleen herstellen --}}
-                                <form method="POST" action="{{ route('manager.requests.restore', $request->id) }}" style="display:inline;">
+                            @if($request->status === \App\Models\LeaveRequest::STATUS_PENDING)
+                                <form method="POST" action="{{ route('admin.leave-requests.approve', $request) }}" style="display:inline;">
                                     @csrf
-{{--                                    <button class="btn-chip" type="submit">Herstellen</button>--}}
+                                    <button class="btn-chip btn-approve" type="submit">Goedkeuren</button>
+                                </form>
+
+                                <button class="btn-chip btn-decline" type="button" data-id="{{ $request->id }}">
+                                    Afkeuren
+                                </button>
+
+                                <form id="reject-form-{{ $request->id }}" method="POST"
+                                      action="{{ route('admin.leave-requests.reject', $request) }}" style="display:none;">
+                                    @csrf
                                 </form>
                             @else
-                                {{-- Normale view --}}
-                                @if($isPending)
-                                    <form method="POST" action="{{ route('admin.leave-requests.approve', $request) }}" style="display:inline;">
-                                        @csrf
-                                        <button class="btn-chip btn-approve" type="submit">Goedkeuren</button>
-                                    </form>
-
-                                    <button class="btn-chip btn-decline" type="button">Afkeuren</button>
-
-                                    <form id="reject-form-{{ $request->id }}" method="POST" action="{{ route('admin.leave-requests.reject', $request) }}" style="display:none;">
-                                        @csrf
-                                    </form>
-                                @endif
-
-                                {{-- Verbergen mag altijd in normale view (ook approved/rejected),
-                                     als je dit alleen voor pending wilt: zet deze ook binnen if($isPending) --}}
-                                <form method="POST" action="{{ route('manager.requests.hide', $request) }}" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn-chip" type="submit">Verwijder</button>
-                                </form>
+                                <span style="opacity:.7;">—</span>
                             @endif
                         </td>
+
                     </tr>
                 @empty
                     <tr>
