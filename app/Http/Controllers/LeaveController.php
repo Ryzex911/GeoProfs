@@ -33,51 +33,33 @@ class LeaveController extends Controller
     public function store(StoreLeaveRequestRequest $request)
     {
         $user = Auth::user();
+        // StoreLeaveRequest wordt gebruikt om bedrijfsregels te valideren
         $data = $request->validated();
 
-        // Verloftype
-        $leaveType = null;
-        if (!empty($data['leave_type_id'])) {
-            $leaveType = \App\Models\LeaveType::find($data['leave_type_id']);
+        $start = Carbon::parse($data['start_date']);
+        $end = Carbon::parse($data['end_date']);
+
+        $proofPath = null;
+        if ($request->hasFile('proof')) {
+            $proofPath = $request->file('proof')->store('proofs', 'public');
         }
-        if (!$leaveType) {
-            return response()->json(['message' => 'Ongeldig verloftype.'], 422);
-        }
-
-        // Input: accepteer beide varianten
-        $startInput = $data['start_date'] ?? $data['from'] ?? null;
-        $endInput   = $data['end_date']   ?? $data['to']   ?? null;
-
-        if (!$startInput || !$endInput) {
-            return response()->json(['message' => 'Start- en einddatum zijn vereist.'], 422);
-        }
-
-        // ✅ definieer $start en $end altijd
-        $start = Carbon::parse($startInput);
-        $end   = Carbon::parse($endInput);
-
-        if ($end->lte($start)) {
-            return response()->json(['message' => '"Tot" moet na "Van" zijn.'], 422);
-        }
-
-        // reason: als je FormRequest reason required maakt, komt dit altijd mee
-        $reason = $data['reason'] ?? null;
 
         $leaveRequest = LeaveRequest::create([
-            'employee_id' => $user->id,
-            'leave_type_id' => $leaveType->id,
-            'reason' => $reason,
-            'start_date' => $start->toDateTimeString(),
-            'end_date' => $end->toDateTimeString(),
-            'proof' => null,
-            'status' => LeaveRequest::STATUS_PENDING,
+            'employee_id' => Auth::id(),
+            'leave_type_id' => $data['leave_type_id'],
+            'reason' => $data['reason'] ?? null,
+            'start_date' => $start->toDateString(),
+            'end_date' => $end->toDateString(),
+            'proof' => $proofPath,
+            'status' => 'ingediend',
             'submitted_at' => now(),
             'notification_sent' => false,
         ]);
 
+        Log::info('Verlofaanvraag ingediend', ['user_id' => $user->id, 'leave_request_id' => $leaveRequest->id]);
+
         return response()->json(['success' => true, 'leave_request' => $leaveRequest], 201);
     }
-
 
     public function destroy(LeaveRequest $leaveRequest)
     {

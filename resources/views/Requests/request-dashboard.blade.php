@@ -259,13 +259,6 @@
     /* ========== SUBMIT (AJAX) + RESET ========== */
     submitBtn.addEventListener('click', async () => {
         const leaveTypeId = leaveTypeSelect.value;
-        if (!leaveTypeId) return alert('Kies een verloftype.');
-
-        if (!from.value || !to.value) return alert('Kies een Van en Tot datum.');
-
-        if (new Date(to.value) <= new Date(from.value)) {
-            return alert('"Tot" moet na "Van" zijn.');
-        }
 
         // Backend eist reason -> stuur altijd iets
         const leaveTypeText = leaveTypeSelect.options[leaveTypeSelect.selectedIndex]?.text || 'Verlof';
