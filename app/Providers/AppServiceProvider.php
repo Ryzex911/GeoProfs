@@ -8,6 +8,7 @@ use Illuminate\Validation\Rules\Password;
 use App\Models\LeaveRequest;
 use App\Observers\LeaveRequestObserver;
 use Illuminate\Support\Facades\Gate;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
