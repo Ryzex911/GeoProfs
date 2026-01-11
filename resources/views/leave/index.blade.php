@@ -1,4 +1,6 @@
-
+@php
+    use App\Models\LeaveRequest;
+@endphp
 
     <!doctype html>
 <html lang="nl">
@@ -85,11 +87,11 @@
                         <td class="actions">
 
                             {{-- ALS STATUS = INGEDIEND --}}
-                            @if ($req->status === 'ingediend')
 
-                                {{-- Annuleer knop --}}
-                                <form action="{{ route('leave-requests.cancel', $req->id) }}"
-                                      method="POST">
+
+                            @if ($req->status === LeaveRequest::STATUS_PENDING)
+
+                                <form action="{{ route('leave-requests.cancel', $req->id) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
 
@@ -100,12 +102,9 @@
                                     </button>
                                 </form>
 
-                                {{-- ALS STATUS = GEANNULEERD --}}
-                            @elseif ($req->status === 'geannuleerd')
+                            @elseif ($req->status === LeaveRequest::STATUS_CANCELED)
 
-                                {{-- Soft delete --}}
-                                <form action="{{ route('leave-requests.destroy', $req->id) }}"
-                                      method="POST">
+                                <form action="{{ route('leave-requests.destroy', $req->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
 
