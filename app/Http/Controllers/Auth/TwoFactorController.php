@@ -51,6 +51,13 @@ class TwoFactorController extends Controller
         Session::forget(['2fa:user:id','2fa:code','2fa:expires_at','2fa:remember']);
         $request->session()->regenerate();
 
+        $user = Auth::user();
+        $roleService = app(\App\Services\RoleService::class);
+        $firstRoleId = $user->roles()->pluck('roles.id')->first();
+        if ($firstRoleId) {
+            $roleService->setActiveRoleId((int)$firstRoleId);
+        }
+
         return redirect()->intended(route('dashboard'))->with('success', 'Je bent succesvol ingelogd.');
     }
 

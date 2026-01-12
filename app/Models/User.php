@@ -60,6 +60,17 @@ class User extends Authenticatable
         return $this->roles()->whereIn('name', $roles)->exists();
     }
 
+    public function activeRoleIs(string $roleName): bool
+    {
+        $roleId = session('active_role_id');
+        if (!$roleId) return false;
+
+        return $this->roles()
+            ->where('roles.id', $roleId)
+            ->where('roles.name', $roleName)
+            ->exists();
+    }
+
     // Lock helpers
     // Controleerd of een user geblokeerd is
     public function isLocked(): bool

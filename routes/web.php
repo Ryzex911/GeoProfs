@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AdminController;
+use App\Services\RoleService;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root
@@ -54,3 +55,27 @@ Route::middleware('auth')->group(function () {
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
     ->middleware('auth')
     ->name('admin.dashboard');
+
+Route::post('/switch-role', [RoleController::class, 'switch'])
+    ->name('role.switch')
+    ->middleware('auth');
+
+
+Route::get('/debug-role', function (RoleService $roleService) {
+    $user = auth()->user();
+
+    if (!$user) {
+        return 'Niet ingelogd';
+    }
+
+    $activeRoleId = $roleService->getActiveRoleId();
+    $activeRole = $roleService->getActiveRole($user);
+
+    dd([
+        'active_role_id_in_session' => $activeRoleId,
+        'active_role' => $activeRole?->only(['id', 'name']),
+        'user_roles' => $user->roles()->get(['id', 'name'])->toArray(),
+        'php_version' => phpversion(),
+        'php_version_id' => PHP_VERSION_ID,
+    ]);
+})->middleware('auth');

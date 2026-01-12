@@ -83,7 +83,6 @@
         </div>
     </div>
 
-
     {{-- Rollen aanpassen modal --}}
     <div id="roleModal" class="role-modal hidden">
         <div class="modal-box">
@@ -111,7 +110,6 @@
 
         </div>
     </div>
-
 
 @endsection
 
