@@ -8,6 +8,7 @@ use App\Models\LoginAttempt;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -85,6 +86,7 @@ class LoginController extends Controller
                 'code' => 'Kon de 2FA-e-mail niet verzenden. Probeer opnieuw of klik op "Code opnieuw sturen".'
             ]);
         }
+
     }
 
     protected function authenticated($request, $user)

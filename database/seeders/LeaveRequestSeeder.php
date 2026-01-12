@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class LeaveRequestsSeeder extends Seeder
+class LeaveRequestSeeder extends Seeder
 {
     public function run()
     {
