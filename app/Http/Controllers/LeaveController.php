@@ -121,5 +121,4 @@ class LeaveController extends Controller
         return view('requests.dashboard', compact('lopendeAanvragen'));
     }
 
-
 }
