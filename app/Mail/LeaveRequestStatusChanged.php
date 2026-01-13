@@ -33,7 +33,9 @@ class LeaveRequestStatusChanged extends Mailable
         return $this->subject('Update over je verlofaanvraag: ' . $this->statusLabel)
             ->markdown('emails.leave_requests.status_changed', [
                 'leaveRequest' => $this->leaveRequest,
-                'statusLabel' => $this->statusLabel,
+                'statusLabel'  => $this->statusLabel,
+                'opmerking'    => $this->leaveRequest->opmerking,
             ]);
     }
+
 }

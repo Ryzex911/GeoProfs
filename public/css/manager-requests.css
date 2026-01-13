@@ -375,4 +375,13 @@ tr:hover td{
     .table-wrap{
         overflow-x:auto;
     }
+
+}
+
+/* Geannuleerd */
+.status-pill.status-canceled,
+.status-canceled {
+    background: #e0f2fe;      /* lichtblauw */
+    color: #0369a1;           /* blauw */
+    border: 1px solid #bae6fd;
 }

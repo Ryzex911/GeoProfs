@@ -27,6 +27,7 @@ class LeaveRequest extends Model
         'approved_by',
         'canceled_at',
         'notification_sent',
+        'opmerking',
     ];
 
     protected $casts = [

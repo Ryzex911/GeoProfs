@@ -117,5 +117,13 @@ Route::post('/manager/requests/{id}/restore', [LeaveApprovalController::class, '
     ->middleware('auth')
     ->name('manager.requests.restore');
 
+Route::post('/manager/requests/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])
+    ->middleware('auth')
+    ->name('manager.requests.approve');
+
+Route::post('/manager/requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])
+    ->middleware('auth')
+    ->name('manager.requests.reject');
+
 
 

@@ -3,7 +3,6 @@
 
     $isDeletedView = $isDeletedView ?? false;
 @endphp
-
     <!doctype html>
 <html lang="nl">
 <head>
@@ -23,7 +22,7 @@
     </div>
     <div class="userbox">
         <span class="user-role-chip">Ingelogd als manager</span>
-        <span>Tawfik</span>
+        <span>{{ auth()->user()->name ?? 'Manager' }}</span>
         <img src="https://i.pravatar.cc/150?img=23" alt="Profiel">
     </div>
 </div>
@@ -79,10 +78,10 @@
                 <label for="statusFilter">Status</label>
                 <select id="statusFilter">
                     <option value="">Alle statussen</option>
-                    <option value="pending">In afwachting</option>
-                    <option value="approved">Goedgekeurd</option>
-                    <option value="rejected">Afgekeurd</option>
-                    <option value="canceled">Geannuleerd</option>
+                    <option value="{{ LeaveRequest::STATUS_PENDING }}">In afwachting</option>
+                    <option value="{{ LeaveRequest::STATUS_APPROVED }}">Goedgekeurd</option>
+                    <option value="{{ LeaveRequest::STATUS_REJECTED }}">Afgekeurd</option>
+                    <option value="{{ LeaveRequest::STATUS_CANCELED }}">Geannuleerd</option>
                 </select>
             </div>
 
@@ -136,7 +135,7 @@
                             LeaveRequest::STATUS_APPROVED => 'Goedgekeurd',
                             LeaveRequest::STATUS_REJECTED => 'Afgekeurd',
                             LeaveRequest::STATUS_CANCELED => 'Geannuleerd',
-                            default => $request->status,
+                            default => (string) $request->status,
                         };
 
                         $statusClass = match($request->status) {
@@ -155,6 +154,13 @@
                             : 0;
 
                         $isPending = ($request->status === LeaveRequest::STATUS_PENDING);
+
+                        $canSoftDeleteAfterReview = in_array($request->status, [
+                            LeaveRequest::STATUS_APPROVED,
+                            LeaveRequest::STATUS_REJECTED,
+                            LeaveRequest::STATUS_CANCELED,
+                        ], true);
+
                     @endphp
 
                     <tr
@@ -162,6 +168,7 @@
                         data-employee="{{ strtolower($employeeName) }}"
                         data-email="{{ strtolower($employeeSub) }}"
                         data-status="{{ $request->status }}"
+                        data-is-pending="{{ $isPending ? '1' : '0' }}"
                         data-reason="{{ strtolower($reasonLabel) }}"
                         data-start="{{ $request->start_date?->format('Y-m-d') }}"
                     >
@@ -184,25 +191,52 @@
                         </td>
 
                         <td class="actions-cell">
-                            @if($request->status === \App\Models\LeaveRequest::STATUS_PENDING)
-                                <form method="POST" action="{{ route('admin.leave-requests.approve', $request) }}" style="display:inline;">
+                            @if($isDeletedView)
+                                {{-- VERWIJDERDE VIEW: herstellen --}}
+                                <form method="POST" action="{{ route('manager.requests.restore', $request->id) }}" style="display:inline;">
                                     @csrf
-                                    <button class="btn-chip btn-approve" type="submit">Goedkeuren</button>
+                                    <button class="btn-chip" type="submit">Herstellen</button>
                                 </form>
 
-                                <button class="btn-chip btn-decline" type="button" data-id="{{ $request->id }}">
-                                    Afkeuren
-                                </button>
-
-                                <form id="reject-form-{{ $request->id }}" method="POST"
-                                      action="{{ route('admin.leave-requests.reject', $request) }}" style="display:none;">
-                                    @csrf
-                                </form>
+                                {{-- Permanent verwijderen: alleen tonen als route bestaat --}}
+                                @if(\Illuminate\Support\Facades\Route::has('manager.requests.forceDelete'))
+                                    <form method="POST" action="{{ route('manager.requests.forceDelete', $request->id) }}" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn-chip btn-decline" type="submit">Permanent verwijderen</button>
+                                    </form>
+                                @endif
                             @else
-                                <span style="opacity:.7;">—</span>
+                                {{-- NORMALE VIEW --}}
+                                @if($isPending)
+                                    <form method="POST" action="{{ route('manager.requests.approve', $request) }}" style="display:inline;">
+                                        @csrf
+                                        <button class="btn-chip btn-approve" type="submit">Goedkeuren</button>
+                                    </form>
+
+                                    <button class="btn-chip btn-decline" type="button">
+                                        Afkeuren
+                                    </button>
+
+                                    <form id="reject-form-{{ $request->id }}" method="POST"
+                                          action="{{ route('manager.requests.reject', $request) }}" style="display:none;">
+                                        @csrf
+                                        <input type="hidden" name="reason" value="">
+                                    </form>
+
+                                @elseif($canSoftDeleteAfterReview)
+                                    {{-- SOFT DELETE (pas na goedkeurd/afgekeurd) --}}
+                                    <form method="POST" action="{{ route('manager.requests.hide', $request) }}" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn-chip" type="submit">Verwijderen</button>
+                                    </form>
+
+                                @else
+                                    <span style="opacity:.7;">—</span>
+                                @endif
                             @endif
                         </td>
-
                     </tr>
                 @empty
                     <tr>
@@ -241,7 +275,7 @@
 @endif
 
 <script>
-    // Modal logic (alleen relevant als er afkeur-knoppen zijn)
+    // Modal logic (afkeuren) + reason meegeven (pending check via data-is-pending)
     (function () {
         const table = document.querySelector('table tbody');
         const declineModal = document.getElementById('declineModal');
@@ -266,7 +300,13 @@
             if (!declineBtn) return;
 
             const row = declineBtn.closest('tr');
-            activeRequestId = row?.dataset?.requestId || null;
+            const requestId = row?.dataset?.requestId || null;
+            const isPending = row?.dataset?.isPending === '1';
+
+            // Alleen modal openen bij pending (anders is het bv. een andere decline-knop)
+            if (!requestId || !isPending) return;
+
+            activeRequestId = requestId;
 
             if (declineEmployee) declineEmployee.textContent = row?.dataset?.employee || 'medewerker';
             declineModal.classList.add('is-visible');
@@ -282,7 +322,12 @@
         declineSubmit?.addEventListener('click', function () {
             if (!activeRequestId) return;
             const form = document.getElementById('reject-form-' + activeRequestId);
-            if (form) form.submit();
+            if (!form) return;
+
+            const hidden = form.querySelector('input[name="reason"]');
+            if (hidden) hidden.value = (declineReason?.value || '').trim();
+
+            form.submit();
         });
     })();
 </script>
@@ -360,7 +405,7 @@
         }
 
         // restore saved filters
-        searchInput.value  = localStorage.getItem('mgr_q') || '';
+        searchInput.value  = localStorage.getItem('mgr_q')  || '';
         statusFilter.value = localStorage.getItem('mgr_st') || '';
         reasonFilter.value = localStorage.getItem('mgr_rs') || '';
         dateFilter.value   = localStorage.getItem('mgr_dm') || '';
