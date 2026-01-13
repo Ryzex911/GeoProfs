@@ -126,10 +126,6 @@ Route::post('/manager/requests/{leaveRequest}/reject', [LeaveApprovalController:
     ->name('manager.requests.reject');
 
 
-Route::get('/manager/requests', function () {
-    return view('Requests.manager-requestsboard');
-})->middleware(['auth']);
-
 Route::get('/manager/dashboard', function () {
     return view('Manager.Manager-dashboard');
 })->middleware(['auth']);

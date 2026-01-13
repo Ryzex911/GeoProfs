@@ -123,7 +123,7 @@
                 </thead>
 
                 <tbody>
-                @forelse ($requests as $request)
+                @forelse($requests as $request)
                     @php
                         $employeeName = $request->employee?->name ?? 'Onbekend';
                         $employeeSub  = $request->employee?->email ?? '';
