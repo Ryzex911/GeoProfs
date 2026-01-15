@@ -20,6 +20,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
         ]);
+        $this->call([
+            LeaveTypeSeeder::class,
+        ]);
+
         LeaveRequest::factory(3)->create();
 
     }
