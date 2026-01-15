@@ -1,3 +1,5 @@
+@extends('layouts.master')
+
 <!doctype html>
 <html lang="nl">
 <head>
