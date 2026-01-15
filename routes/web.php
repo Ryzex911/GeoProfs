@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\LeaveApprovalController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AdminController;
+use App\Services\RoleService;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root
@@ -38,6 +39,9 @@ Route::middleware('2fa.pending')->group(function () {
     Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 });
 
+// Logout
+Route::post('/logout', [LoginController::class, 'logout'])
+    ->middleware('auth')->name('logout');
 
 //Hier is de route naar de medewerker dashboard na het inloggen om zijn overzicht te zien
 Route::get('/dashboard', [LeaveController::class, 'dashboardOverview'])
@@ -129,3 +133,27 @@ Route::post('/manager/requests/{leaveRequest}/reject', [LeaveApprovalController:
 Route::get('/manager/dashboard', function () {
     return view('Manager.Manager-dashboard');
 })->middleware(['auth']);
+
+Route::post('/switch-role', [RoleController::class, 'switch'])
+    ->name('role.switch')
+    ->middleware('auth');
+
+
+Route::get('/debug-role', function (RoleService $roleService) {
+    $user = auth()->user();
+
+    if (!$user) {
+        return 'Niet ingelogd';
+    }
+
+    $activeRoleId = $roleService->getActiveRoleId();
+    $activeRole = $roleService->getActiveRole($user);
+
+    dd([
+        'active_role_id_in_session' => $activeRoleId,
+        'active_role' => $activeRole?->only(['id', 'name']),
+        'user_roles' => $user->roles()->get(['id', 'name'])->toArray(),
+        'php_version' => phpversion(),
+        'php_version_id' => PHP_VERSION_ID,
+    ]);
+})->middleware('auth');

@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -46,19 +46,30 @@ class User extends Authenticatable
         return $this->belongsTo(Team::class);
     }
 
-    // Role helpers
-    // Controleerd of een user een bepaalde role(en) heeft door true of false te geven.
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
     }
 
+    // Role helpers
+    // Controleerd of een user een bepaalde role(en) heeft door true of false te geven.
     public function hasRole(string|array $roles): bool
     {
         // Rollen worden omgezet naar een array om makkelijker mee te werken.
         $roles = is_array($roles) ? $roles : [$roles];
 
         return $this->roles()->whereIn('name', $roles)->exists();
+    }
+
+    public function activeRoleIs(string $roleName): bool
+    {
+        $roleId = session('active_role_id');
+        if (!$roleId) return false;
+
+        return $this->roles()
+            ->where('roles.id', $roleId)
+            ->where('roles.name', $roleName)
+            ->exists();
     }
 
     public function leaveRequests(): HasMany
