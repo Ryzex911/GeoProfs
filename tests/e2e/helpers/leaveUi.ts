@@ -1,4 +1,3 @@
-
 import { expect, type Locator, type Page } from '@playwright/test';
 
 async function clickCalendarDay(page: Page, day: number) {
