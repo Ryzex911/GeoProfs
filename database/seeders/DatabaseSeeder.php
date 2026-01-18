@@ -22,6 +22,15 @@ class DatabaseSeeder extends Seeder
         ]);
         LeaveRequest::factory(3)->create();
 
+        $this->call([
+            LeaveTypeSeeder::class,
+        ]);
+
+        $this->call([
+            LeaveRequestSeeder::class,
+        ]);
+
+
     }
 
 

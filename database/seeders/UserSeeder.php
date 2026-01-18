@@ -12,32 +12,34 @@ class UserSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-   public function run()
-{
-    \App\Models\User::create([
-        'name' => 'Osama',
-        'lastname' => 'asmi',
-        'email' => 'osama.asmi04@gmail.com',
-        'password' => Hash::make('12345678')
-    ]);
-
-    \App\Models\User::create([
-        'name' => 'Tamz',
-        'lastname' => 'id',
-        'email' => 'Tmmpsacc@outlook.com',
-        'password' => Hash::make('1234567890')
-    ]);
-    \App\Models\User::create([
-        'name' => 'Lukas',
-        'lastname' => 'id',
-        'email' => 'ledegreef07@gmail.com',
-        'password' => Hash::make('12345678')
-    ]);
-    
-}
-
     public function run()
     {
+        \App\Models\User::updateOrCreate(
+            ['email' => 'osama.asmi04@gmail.com'],
+            [
+                'name' => 'Osama',
+                'lastname' => 'asmi',
+                'password' => Hash::make('12345678')
+            ]
+        );
 
+        \App\Models\User::updateOrCreate(
+            ['email' => 'Tmmpsacc@outlook.com'],
+            [
+                'name' => 'Tamz',
+                'lastname' => 'id',
+                'password' => Hash::make('1234567890')
+            ]
+        );
+
+        \App\Models\User::updateOrCreate(
+            ['email' => 'ledegreef07@gmail.com'],
+            [
+                'name' => 'Lukas',
+                'lastname' => 'id',
+                'password' => Hash::make('12345678')
+            ]
+        );
     }
 }
+
