@@ -69,7 +69,7 @@ test.describe('TC-MA01: Manager keurt verlofaanvraag goed', () => {
         await expect(page).toHaveURL(/dashboard/i);
     });
 
-    test('Stap 1: Manager navigeert naar verlofbeheer-URL', async ({ page }) => {
+    test('Stap 1: Manager navigeert naar manager-dashboard', async ({ page }) => {
         // Navigeer naar manager dashboard (verlofbeheer)
         await page.goto('/manager/dashboard');
 
