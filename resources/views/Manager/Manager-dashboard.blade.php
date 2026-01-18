@@ -94,7 +94,7 @@
                     </div>
                 </div>
 
-                <a href="#" class="link-all-requests">Bekijk alle aanvragen</a>
+                <a href="{{ route('manager.requests.index') }}" class="link-all-requests">Bekijk alle aanvragen</a>
             </div>
         </section>
 

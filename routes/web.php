@@ -118,4 +118,6 @@ Route::post('/manager/requests/{id}/restore', [LeaveApprovalController::class, '
     ->name('manager.requests.restore');
 
 
-
+Route::get('/manager/dashboard', function () {
+    return view('Manager.Manager-dashboard');
+})->middleware(['auth']);
