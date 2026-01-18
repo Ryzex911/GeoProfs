@@ -24,17 +24,22 @@ class DatabaseSeeder extends Seeder
             LeaveTypeSeeder::class,
         ]);
 
-        LeaveRequest::factory(3)->create();
+        // Gebruik E2eSeeder voor E2E tests, anders normale seeders
+        if (env('E2E_TESTING', false)) {
+            $this->call([
+                E2eSeeder::class,
+            ]);
+        } else {
+            LeaveRequest::factory(3)->create();
 
-        $this->call([
-            LeaveTypeSeeder::class,
-        ]);
+            $this->call([
+                LeaveTypeSeeder::class,
+            ]);
 
-        $this->call([
-            LeaveRequestSeeder::class,
-        ]);
-
-
+            $this->call([
+                LeaveRequestSeeder::class,
+            ]);
+        }
     }
 
 

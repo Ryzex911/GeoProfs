@@ -13,25 +13,32 @@ class UserSeeder extends Seeder
      */
    public function run()
 {
-    User::create([
-        'name' => 'Osama',
-        'lastname' => 'asmi',
-        'email' => 'osama.asmi04@gmail.com',
-        'password' => Hash::make('12345678')
-    ]);
+    User::updateOrCreate(
+        ['email' => 'osama.asmi04@gmail.com'],
+        [
+            'name' => 'Osama',
+            'lastname' => 'asmi',
+            'password' => Hash::make('12345678')
+        ]
+    );
 
-    User::create([
-        'name' => 'Tamz',
-        'lastname' => 'id',
-        'email' => 'Tmmpsacc@outlook.com',
-        'password' => Hash::make('1234567890')
-    ]);
-    User::create([
-        'name' => 'Lukas',
-        'lastname' => 'id',
-        'email' => 'ledegreef07@gmail.com',
-        'password' => Hash::make('12345678')
-    ]);
+    User::updateOrCreate(
+        ['email' => 'Tmmpsacc@outlook.com'],
+        [
+            'name' => 'Tamz',
+            'lastname' => 'id',
+            'password' => Hash::make('1234567890')
+        ]
+    );
+
+    User::updateOrCreate(
+        ['email' => 'ledegreef07@gmail.com'],
+        [
+            'name' => 'Lukas',
+            'lastname' => 'id',
+            'password' => Hash::make('12345678')
+        ]
+    );
 
     $users = User::factory()->count(10)->create();
     foreach ($users as $user) {
