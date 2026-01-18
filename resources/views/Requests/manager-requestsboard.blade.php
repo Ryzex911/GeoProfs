@@ -36,11 +36,11 @@
 
             <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
                 @if(!$isDeletedView)
-                    <a class="btn-chip" href="{{ route('manager.requests.deleted') }}">
+                    <a class="btn-chip" href="{{ route('Requests.requests.deleted') }}">
                         Verwijderde aanvragen bekijken
                     </a>
                 @else
-                    <a class="btn-chip" href="{{ route('manager.requests.index') }}">
+                    <a class="btn-chip" href="{{ route('Requests.requests.index') }}">
                         Terug naar aanvragen
                     </a>
                 @endif

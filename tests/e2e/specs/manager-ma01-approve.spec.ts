@@ -91,16 +91,16 @@ test.describe('TC-MA01: Manager keurt verlofaanvraag goed', () => {
         await expect(requestsLink).toBeVisible({ timeout: 5000 });
         await requestsLink.click();
 
-        // Controleer dat we op manager/requests pagina zijn
-        await expect(page).toHaveURL(/\/manager\/requests/i);
-        await expect(page.getByText(/verlofaanvragen beoordelen|aanvragen/i)).toBeVisible({ timeout: 5000 });
+        // Controleer dat we op Requests/requests pagina zijn
+        await expect(page).toHaveURL(/\/Requests\/requests/i);
+        await expect(page.getByText('Verlofaanvragen beoordelen')).toBeVisible({ timeout: 5000 });
     });
 
     test('Stap 3: Manager ziet tabel met "In afwachting" aanvragen', async ({ page }) => {
         // Navigeer naar aanvragen pagina
         await page.goto('/manager/dashboard');
         await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
-        await expect(page).toHaveURL(/\/manager\/requests/i);
+        await expect(page).toHaveURL(/\/Requests\/requests/i);
 
         // Controleer dat tabel zichtbaar is
         const table = page.locator('table');
@@ -119,7 +119,7 @@ test.describe('TC-MA01: Manager keurt verlofaanvraag goed', () => {
         // Navigeer naar aanvragen
         await page.goto('/manager/dashboard');
         await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
-        await expect(page).toHaveURL(/\/manager\/requests/i);
+        await expect(page).toHaveURL(/\/Requests\/requests/i);
 
         // Vind eerste pending aanvraag rij
         const pendingRow = page.locator('table tbody tr').filter({
@@ -143,7 +143,7 @@ test.describe('TC-MA01: Manager keurt verlofaanvraag goed', () => {
         // Navigeer naar aanvragen
         await page.goto('/manager/dashboard');
         await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
-        await expect(page).toHaveURL(/\/manager\/requests/i);
+        await expect(page).toHaveURL(/\/Requests\/requests/i);
 
         // Vind eerste pending aanvraag
         const pendingRow = page.locator('table tbody tr').filter({
@@ -172,7 +172,7 @@ test.describe('TC-MA01: Manager keurt verlofaanvraag goed', () => {
         // Navigeer naar aanvragen
         await page.goto('/manager/dashboard');
         await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
-        await expect(page).toHaveURL(/\/manager\/requests/i);
+        await expect(page).toHaveURL(/\/Requests\/requests/i);
 
         // De goedgekeurde aanvraag zou niet meer in pending sectie moeten zijn
         const pendingRows = page.locator('table tbody tr').filter({
