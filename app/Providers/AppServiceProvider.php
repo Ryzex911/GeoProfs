@@ -27,12 +27,13 @@ class AppServiceProvider extends ServiceProvider
         Vite::prefetch(concurrency: 3);
 
         Password::defaults(function () {
-            return Password::min(8); // minimaal 6 tekens
+            return Password::min(8);
         });
 
+        // HIER wordt je observer correct gekoppeld
         LeaveRequest::observe(LeaveRequestObserver::class);
 
-
-        Gate::policy(User::class, UserPolicy::class);
+        // Als je policies gebruikt
+        // Gate::policy(User::class, UserPolicy::class);
     }
 }
