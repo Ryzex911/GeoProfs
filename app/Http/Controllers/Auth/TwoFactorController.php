@@ -58,6 +58,7 @@ class TwoFactorController extends Controller
             $roleService->setActiveRoleId((int)$firstRoleId);
         }
 
+
         return redirect()->intended(route('dashboard'))->with('success', 'Je bent succesvol ingelogd.');
     }
 

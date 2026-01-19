@@ -209,10 +209,14 @@
                             @else
                                 {{-- NORMALE VIEW --}}
                                 @if($isPending)
+                                    @can('approve', $request)
                                     <form method="POST" action="{{ route('manager.requests.approve', $request) }}" style="display:inline;">
                                         @csrf
                                         <button class="btn-chip btn-approve" type="submit">Goedkeuren</button>
                                     </form>
+                                    @endcan
+
+                                    @can('reject', $request)
 
                                     <button class="btn-chip btn-decline" type="button">
                                         Afkeuren
@@ -223,6 +227,7 @@
                                         @csrf
                                         <input type="hidden" name="reason" value="">
                                     </form>
+                                    @endcan
 
                                 @elseif($canSoftDeleteAfterReview)
                                     {{-- SOFT DELETE (pas na goedkeurd/afgekeurd) --}}

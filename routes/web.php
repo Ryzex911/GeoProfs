@@ -5,9 +5,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\TwoFactorController;
-use App\Http\Controllers\LeaveController;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\LeaveApprovalController;
+use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Services\RoleService;
@@ -150,10 +149,8 @@ Route::get('/debug-role', function (RoleService $roleService) {
     $activeRole = $roleService->getActiveRole($user);
 
     dd([
-        'active_role_id_in_session' => $activeRoleId,
-        'active_role' => $activeRole?->only(['id', 'name']),
-        'user_roles' => $user->roles()->get(['id', 'name'])->toArray(),
-        'php_version' => phpversion(),
-        'php_version_id' => PHP_VERSION_ID,
+
+        'session_role_id' => session('active_role_id'),
+        'user_roles' => auth()->user()->roles->pluck('id', 'name'),
     ]);
 })->middleware('auth');

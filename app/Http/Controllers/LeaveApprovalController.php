@@ -12,6 +12,8 @@ class LeaveApprovalController extends Controller
 {
     public function index()
     {
+        $this->authorize('leaveApprovePage', LeaveRequest::class);
+
         $requests = LeaveRequest::query()
             ->with(['employee', 'leaveType'])
             ->latest('submitted_at')
@@ -30,6 +32,8 @@ class LeaveApprovalController extends Controller
 
     public function approve(LeaveRequest $leaveRequest)
     {
+        $this->authorize('approve', $leaveRequest);
+
         if ($leaveRequest->status !== LeaveRequest::STATUS_PENDING) {
             return back();
         }
@@ -48,6 +52,8 @@ class LeaveApprovalController extends Controller
 
     public function reject(Request $request, LeaveRequest $leaveRequest)
     {
+        $this->authorize('reject', $leaveRequest);
+
         if ($leaveRequest->status !== LeaveRequest::STATUS_PENDING) {
             return back();
         }

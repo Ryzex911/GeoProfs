@@ -4,17 +4,27 @@ namespace App\Policies;
 
 use App\Models\LeaveRequest;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class LeaveRequestPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function leaveApprovePage(User $user): bool
     {
-        return false;
+        return $user->activeRoleIs(['manager', 'projectleider']);
     }
+
+    public function approve(User $user): bool
+    {
+        return $user->activeRoleIs(['manager', 'projectleider']);
+    }
+
+    public function reject(User $user): bool
+    {
+        return $user->activeRoleIs(['manager', 'projectleider']);
+    }
+
 
     /**
      * Determine whether the user can view the model.
