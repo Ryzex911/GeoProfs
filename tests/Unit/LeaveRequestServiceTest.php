@@ -105,7 +105,7 @@ class LeaveRequestServiceTest extends TestCase
         $this->service->approveRequest(1, $managerId);
     }
 
-    // 5. Optioneel: al afgekeurd (randgeval)
+    // 5. al afgekeurd (randgeval)
     public function test_approveRequest_whenAlreadyRejected_throwsException()
     {
         // Arrange
@@ -122,7 +122,7 @@ class LeaveRequestServiceTest extends TestCase
         $this->service->approveRequest(1, $managerId);
     }
 
-    // 6. Optioneel: repository save wordt aangeroepen (randgeval)
+    // 6. repository save wordt aangeroepen (randgeval)
     public function test_approveRequest_repositorySaveIsCalled()
     {
         // Arrange

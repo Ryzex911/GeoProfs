@@ -132,6 +132,5 @@ class LeaveRequestRejectTest extends TestCase
         $this->assertTrue(true);
     }
 
-    // 6. Optional: reason validation too long (but since no validation in service, perhaps skip or assume it's handled elsewhere)
-    // For now, skip this one as the service doesn't validate length
+
 }
