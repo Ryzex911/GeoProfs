@@ -57,7 +57,7 @@
         "concurrently": "^9.0.1",
         "dotenv": "^17.2.3",
         "globals": "^15.14.0",
-        "imap-simple": "^5.1.0",
+        "imap-simple": "^1.6.3",
         "laravel-vite-plugin": "^2.0",
         "lucide-react": "^0.475.0",
         "react-router-dom": "^7.9.2",

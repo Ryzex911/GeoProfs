@@ -22,14 +22,14 @@ async function fillOtpDInputs(page: Page, otp: string) {
 }
 
 /**
- * TC-MA03: Filteren in manager dashboard
+ * TC-MA03: Manager filtert aanvragen in dashboard
  *
- * Pre-condition: Manager is ingelogd; dashboard bevat meerdere aanvragen met verschillende statussen en van verschillende afdelingen.
+ * Pre-condition: Manager is ingelogd; meerdere aanvragen met uiteenlopende statussen bestaan
  *
- * Beschrijving: Manager kan aanvragen filteren op status en (optioneel) op afdeling.
+ * Beschrijving: Manager filtert aanvragen op status en/of afdeling.
  */
 
-test.describe('TC-MA03: Filteren in manager dashboard', () => {
+test.describe('TC-MA03: Manager filtert aanvragen in dashboard', () => {
     test.beforeEach(async ({ page }) => {
         const logPath = path.join(process.cwd(), 'storage', 'logs', 'laravel.log');
 
@@ -73,31 +73,35 @@ test.describe('TC-MA03: Filteren in manager dashboard', () => {
         // Navigeer naar aanvragen pagina
         await page.goto('/manager/dashboard');
         await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
-        await expect(page).toHaveURL(/\/Requests\/requests/i);
+        await expect(page).toHaveURL(/\/manager\/requests/i);
 
-        // Controleer dat tabel zichtbaar is
-        const table = page.locator('table');
-        await expect(table).toBeVisible({ timeout: 5000 });
+        // Wacht tot tabel geladen is
+        await page.waitForSelector('table tbody tr[data-request-id]');
+        await page.waitForTimeout(1000);
 
-        // Vind status filter
-        const statusFilter = page.locator('select#statusFilter');
+        // Tel totaal aantal rijen voor filter
+        const totalRowsBefore = await page.locator('table tbody tr[data-request-id]').count();
+        console.log('Totaal rijen voor filter:', totalRowsBefore);
+
+        // Kies filter "Goedgekeurd"
+        const statusFilter = page.locator('#statusFilter');
         await expect(statusFilter).toBeVisible();
+        await statusFilter.selectOption({ label: 'Goedgekeurd' });
 
-        // Selecteer "Goedgekeurd" of "approved"
-        await statusFilter.selectOption('approved');
-
-        // Wacht tot filtering is toegepast
-        await page.waitForLoadState('networkidle');
+        // Wacht tot filter is toegepast
+        await page.waitForTimeout(1000);
 
         // Controleer dat alleen goedgekeurde aanvragen zichtbaar zijn
-        const allRows = page.locator('table tbody tr');
-        const rowCount = await allRows.count();
+        const visibleRows = await page.locator('table tbody tr[data-request-id]:not([style*="display: none"])').count();
+        console.log('Zichtbare rijen na filter:', visibleRows);
 
-        if (rowCount > 0) {
-            // Controleer dat alle zichtbare rijen "goedgekeurd" bevatten
+        if (visibleRows > 0) {
+            // Controleer dat alle zichtbare rijen "Goedgekeurd" bevatten
+            const approvedRows = page.locator('table tbody tr[data-request-id]:not([style*="display: none"])');
+            const rowCount = await approvedRows.count();
+
             for (let i = 0; i < rowCount; i++) {
-                const row = allRows.nth(i);
-                await expect(row).toContainText(/goedgekeurd|approved/i);
+                await expect(approvedRows.nth(i)).toContainText(/goedgekeurd|approved/i);
             }
         }
     });
@@ -106,124 +110,202 @@ test.describe('TC-MA03: Filteren in manager dashboard', () => {
         // Navigeer naar aanvragen pagina
         await page.goto('/manager/dashboard');
         await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
-        await expect(page).toHaveURL(/\/Requests\/requests/i);
+        await expect(page).toHaveURL(/\/manager\/requests/i);
 
-        // Vind status filter
-        const statusFilter = page.locator('select#statusFilter');
+        // Wacht tot tabel geladen is
+        await page.waitForSelector('table tbody tr[data-request-id]');
+        await page.waitForTimeout(1000);
+
+        // Kies filter "In afwachting"
+        const statusFilter = page.locator('#statusFilter');
         await expect(statusFilter).toBeVisible();
+        await statusFilter.selectOption({ label: 'In afwachting' });
 
-        // Selecteer "In afwachting" of "pending"
-        await statusFilter.selectOption('pending');
+        // Wacht tot filter is toegepast
+        await page.waitForTimeout(1000);
 
-        // Wacht tot filtering is toegepast
-        await page.waitForLoadState('networkidle');
+        // Controleer dat alleen aanvragen in afwachting zichtbaar zijn
+        const visibleRows = await page.locator('table tbody tr[data-request-id]:not([style*="display: none"])').count();
+        console.log('Zichtbare rijen na filter In afwachting:', visibleRows);
 
-        // Controleer dat alleen pending aanvragen zichtbaar zijn
-        const allRows = page.locator('table tbody tr');
-        const rowCount = await allRows.count();
+        if (visibleRows > 0) {
+            // Controleer dat alle zichtbare rijen "In afwachting" bevatten
+            const pendingRows = page.locator('table tbody tr[data-request-id]:not([style*="display: none"])');
+            const rowCount = await pendingRows.count();
 
-        if (rowCount > 0) {
-            // Controleer dat alle zichtbare rijen "in afwachting" bevatten
             for (let i = 0; i < rowCount; i++) {
-                const row = allRows.nth(i);
-                await expect(row).toContainText(/in afwachting|pending/i);
+                await expect(pendingRows.nth(i)).toContainText(/in afwachting|pending/i);
             }
         }
     });
 
-    test('Stap 3: Manager filtert op eigen afdeling', async ({ page }) => {
+    test('Stap 3: Manager filtert op reden', async ({ page }) => {
         // Navigeer naar aanvragen pagina
         await page.goto('/manager/dashboard');
         await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
-        await expect(page).toHaveURL(/\/Requests\/requests/i);
+        await expect(page).toHaveURL(/\/manager\/requests/i);
 
-        // Zoek naar afdeling/department filter (als aanwezig)
-        const departmentFilter = page.locator('select#departmentFilter, select[name="department"]');
+        // Wacht tot tabel geladen is
+        await page.waitForSelector('table tbody tr[data-request-id]');
+        await page.waitForTimeout(1000);
 
-        if (await departmentFilter.isVisible()) {
-            // Selecteer een afdeling, bijv. "Bouw" of eerste optie
-            const options = await departmentFilter.locator('option').allTextContents();
-            if (options.length > 1) {
-                await departmentFilter.selectOption({ index: 1 }); // Selecteer eerste afdeling
+        // Kies filter op reden "Vakantie"
+        const reasonFilter = page.locator('#reasonFilter');
+        await expect(reasonFilter).toBeVisible();
+        await reasonFilter.selectOption({ label: 'Vakantie' });
 
-                // Wacht tot filtering is toegepast
-                await page.waitForLoadState('networkidle');
+        // Wacht tot filter is toegepast
+        await page.waitForTimeout(1000);
 
-                // Controleer dat filtering is toegepast (moeilijk zonder specifieke data)
-                await expect(page.locator('table')).toBeVisible();
+        // Controleer dat alleen vakantie aanvragen zichtbaar zijn
+        const visibleRows = await page.locator('table tbody tr[data-request-id]:not([style*="display: none"])').count();
+        console.log('Zichtbare rijen na reden filter:', visibleRows);
+
+        if (visibleRows > 0) {
+            // Controleer dat alle zichtbare rijen "Vakantie" bevatten
+            const vacationRows = page.locator('table tbody tr[data-request-id]:not([style*="display: none"])');
+            const rowCount = await vacationRows.count();
+
+            for (let i = 0; i < rowCount; i++) {
+                await expect(vacationRows.nth(i)).toContainText(/vakantie/i);
+            }
+        }
+    });
+
+    test('Stap 4: Manager combineert filters', async ({ page }) => {
+        // Navigeer naar aanvragen pagina
+        await page.goto('/manager/dashboard');
+        await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
+        await expect(page).toHaveURL(/\/manager\/requests/i);
+
+        // Wacht tot tabel geladen is
+        await page.waitForSelector('table tbody tr[data-request-id]');
+        await page.waitForTimeout(1000);
+
+        // Stel eerste filter in: Status = "In afwachting"
+        const statusFilter = page.locator('#statusFilter');
+        await expect(statusFilter).toBeVisible();
+        await statusFilter.selectOption({ label: 'In afwachting' });
+
+        // Wacht tot eerste filter is toegepast
+        await page.waitForTimeout(1000);
+
+        // Stel tweede filter in: Reden = "Vakantie"
+        const reasonFilter = page.locator('#reasonFilter');
+        await expect(reasonFilter).toBeVisible();
+        await reasonFilter.selectOption({ label: 'Vakantie' });
+
+        // Wacht tot beide filters zijn toegepast
+        await page.waitForTimeout(1000);
+
+        // Controleer dat alleen aanvragen zichtbaar zijn die zowel "In afwachting" als "Vakantie" zijn
+        const visibleRows = await page.locator('table tbody tr[data-request-id]:not([style*="display: none"])').count();
+        console.log('Zichtbare rijen na gecombineerde filters:', visibleRows);
+
+        if (visibleRows > 0) {
+            // Controleer dat alle zichtbare rijen zowel "In afwachting" als "Vakantie" bevatten
+            const combinedRows = page.locator('table tbody tr[data-request-id]:not([style*="display: none"])');
+            const rowCount = await combinedRows.count();
+
+            for (let i = 0; i < rowCount; i++) {
+                const row = combinedRows.nth(i);
+                await expect(row).toContainText(/in afwachting|pending/i);
+                await expect(row).toContainText(/vakantie/i);
+            }
+        }
+    });
+
+    test('Stap 5: Manager gebruikt zoekfunctie', async ({ page }) => {
+        // Navigeer naar aanvragen pagina
+        await page.goto('/manager/dashboard');
+        await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
+        await expect(page).toHaveURL(/\/manager\/requests/i);
+
+        // Wacht tot tabel geladen is
+        await page.waitForSelector('table tbody tr[data-request-id]');
+        await page.waitForTimeout(1000);
+
+        // Vind een bestaande medewerker naam om op te zoeken
+        const firstRow = page.locator('table tbody tr[data-request-id]').first();
+        const employeeName = await firstRow.locator('span.name-main').textContent();
+        console.log('Zoeken naar medewerker:', employeeName);
+
+        // Gebruik zoekfunctie
+        const searchInput = page.locator('#search');
+        await expect(searchInput).toBeVisible();
+        await searchInput.fill(employeeName || 'Tamz');
+
+        // Wacht tot zoekfilter is toegepast
+        await page.waitForTimeout(1000);
+
+        // Controleer dat resultaten gefilterd zijn
+        const visibleRows = await page.locator('table tbody tr[data-request-id]:not([style*="display: none"])').count();
+        console.log('Zichtbare rijen na zoeken:', visibleRows);
+
+        if (visibleRows > 0) {
+            // Controleer dat alle zichtbare rijen de gezochte naam bevatten
+            const searchRows = page.locator('table tbody tr[data-request-id]:not([style*="display: none"])');
+            const rowCount = await searchRows.count();
+
+            for (let i = 0; i < rowCount; i++) {
+                await expect(searchRows.nth(i)).toContainText(employeeName || 'Tamz');
+            }
+        }
+    });
+
+    test('Stap 6: Manager controleert paginering', async ({ page }) => {
+        // Navigeer naar aanvragen pagina
+        await page.goto('/manager/dashboard');
+        await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
+        await expect(page).toHaveURL(/\/manager\/requests/i);
+
+        // Wacht tot tabel geladen is
+        await page.waitForSelector('table tbody tr[data-request-id]');
+        await page.waitForTimeout(1000);
+
+        // Controleer of paginering aanwezig is
+        const pagination = page.locator('.pagination, nav[aria-label*="Page"], .page-links');
+        const hasPagination = await pagination.isVisible().catch(() => false);
+
+        if (hasPagination) {
+            console.log('Paginering gevonden, test paginering functionaliteit');
+
+            // Tel aantal rijen op huidige pagina
+            const currentPageRows = await page.locator('table tbody tr[data-request-id]').count();
+            console.log('Rijen op huidige pagina:', currentPageRows);
+
+            // Vind paginatie links
+            const pageLinks = page.locator('.pagination a, nav[aria-label*="Page"] a, .page-links a');
+            const linkCount = await pageLinks.count();
+
+            if (linkCount > 1) {
+                // Klik op volgende pagina indien beschikbaar
+                const nextLink = pageLinks.filter({ hasText: /next|volgende|>/i }).first();
+                if (await nextLink.isVisible()) {
+                    await nextLink.click();
+                    await page.waitForTimeout(1000);
+
+                    // Controleer dat pagina is veranderd
+                    const newPageRows = await page.locator('table tbody tr[data-request-id]').count();
+                    console.log('Rijen op volgende pagina:', newPageRows);
+
+                    // Ga terug naar eerste pagina
+                    const firstLink = pageLinks.filter({ hasText: /first|eerste|<<|1/i }).first();
+                    if (await firstLink.isVisible()) {
+                        await firstLink.click();
+                        await page.waitForTimeout(1000);
+                    }
+                }
             }
         } else {
-            // Als geen afdeling filter, sla deze stap over
-            console.log('Geen afdeling filter gevonden, stap overgeslagen');
-        }
-    });
+            console.log('Geen paginering gevonden, test toont alle resultaten op één pagina');
 
-    test('Stap 4: Combinatiefilter: Afdeling + Status', async ({ page }) => {
-        // Navigeer naar aanvragen pagina
-        await page.goto('/manager/dashboard');
-        await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
-        await expect(page).toHaveURL(/\/Requests\/requests/i);
+            // Controleer totaal aantal rijen
+            const totalRows = await page.locator('table tbody tr[data-request-id]').count();
+            console.log('Totaal aantal rijen (geen paginering):', totalRows);
 
-        // Stel afdeling filter in (als aanwezig)
-        const departmentFilter = page.locator('select#departmentFilter, select[name="department"]');
-        if (await departmentFilter.isVisible()) {
-            const options = await departmentFilter.locator('option').allTextContents();
-            if (options.length > 1) {
-                await departmentFilter.selectOption({ index: 1 });
-            }
-        }
-
-        // Stel status filter in op "In afwachting"
-        const statusFilter = page.locator('select#statusFilter');
-        await statusFilter.selectOption('pending');
-
-        // Wacht tot filtering is toegepast
-        await page.waitForLoadState('networkidle');
-
-        // Controleer dat alleen pending aanvragen van geselecteerde afdeling zichtbaar zijn
-        const allRows = page.locator('table tbody tr');
-        const rowCount = await allRows.count();
-
-        if (rowCount > 0) {
-            // Controleer dat alle zichtbare rijen zowel de afdeling als "in afwachting" bevatten
-            for (let i = 0; i < rowCount; i++) {
-                const row = allRows.nth(i);
-                await expect(row).toContainText(/in afwachting|pending/i);
-                // Afdeling controle zou specifieker zijn met echte data
-            }
-        }
-    });
-
-    test('Stap 5: Paginerings/overzichtstest', async ({ page }) => {
-        // Navigeer naar aanvragen pagina
-        await page.goto('/manager/dashboard');
-        await page.getByRole('link', { name: /aanvragen|verlof|beoordelen/i }).first().click();
-        await expect(page).toHaveURL(/\/Requests\/requests/i);
-
-        // Controleer dat tabel zichtbaar is
-        const table = page.locator('table');
-        await expect(table).toBeVisible();
-
-        // Controleer paginering elementen (als aanwezig)
-        const pagination = page.locator('.pagination, nav[aria-label*="Page"]');
-        if (await pagination.isVisible()) {
-            // Test paginering door naar volgende pagina te gaan
-            const nextBtn = pagination.locator('a, button').filter({ hasText: /next|volgende|>/i });
-            if (await nextBtn.isVisible()) {
-                await nextBtn.click();
-                await page.waitForLoadState('networkidle');
-
-                // Controleer dat pagina is veranderd
-                await expect(table).toBeVisible();
-            }
-        }
-
-        // Controleer totaal aantal resultaten (uit KPI's)
-        const totalKpi = page.locator('.kpi-value').first();
-        if (await totalKpi.isVisible()) {
-            const totalText = await totalKpi.innerText();
-            const total = parseInt(totalText.replace(/\D/g, ''));
-            expect(total).toBeGreaterThanOrEqual(0);
+            // Als er geen paginering is, is de test geslaagd zolang er rijen zijn
+            expect(totalRows).toBeGreaterThan(0);
         }
     });
 });
