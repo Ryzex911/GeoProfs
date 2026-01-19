@@ -22,12 +22,11 @@ class LeaveRequestFactory extends Factory
         $endDate = (clone $startDate)->modify('+' . rand(1, 29) . 'days');
 
         return [
-            'employee_id' => 8,
-            'manager_id' => 7,
-            'type' => $this->faker->randomElement(['ziek', 'vakantie', 'ander']),
+            'employee_id' => 1,
+            'leave_type_id' => rand(1, 3),
             'reason' => $this->faker->sentence(10),
-            'start_date' => $startDate,
-            'end_date' => $endDate,
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate->format('Y-m-d'),
             'status' => 'ingediend',
             'notification_sent' => false,
         ];

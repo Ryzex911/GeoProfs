@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -60,15 +61,26 @@ class User extends Authenticatable
         return $this->roles()->whereIn('name', $roles)->exists();
     }
 
-    public function activeRoleIs(string $roleName): bool
+    public function activeRoleIs(string|array $roles): bool
     {
         $roleId = session('active_role_id');
+
         if (!$roleId) return false;
 
         return $this->roles()
             ->where('roles.id', $roleId)
-            ->where('roles.name', $roleName)
+            ->whereIn('roles.name', $roles)
             ->exists();
+    }
+
+    public function leaveRequests(): HasMany
+    {
+        return $this->hasMany(LeaveRequest::class, 'employee_id');
+    }
+
+    public function approvedLeaveRequests(): HasMany
+    {
+        return $this->hasMany(LeaveRequest::class, 'approved_by');
     }
 
     // Lock helpers

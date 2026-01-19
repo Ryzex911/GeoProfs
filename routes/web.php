@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\TwoFactorController;
+use App\Http\Controllers\LeaveApprovalController;
+use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Services\RoleService;
@@ -17,17 +19,19 @@ Route::redirect('/', '/login');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
 
+// Forgot password (send reset link)
 Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
     ->middleware('guest')->name('password.request');
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
     ->middleware(['guest','throttle:6,1'])->name('password.email');
 
+// Reset password (open form with token, then save)
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
     ->middleware('guest')->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])
     ->middleware('guest')->name('password.store');
 
-// 2FA
+// 2FA is alleen bereikbaar als er een pending-2FA sessie is
 Route::middleware('2fa.pending')->group(function () {
     Route::get('/2fa',  [TwoFactorController::class, 'show'])->name('2fa.show');
     Route::post('/2fa', [TwoFactorController::class, 'verify'])->name('2fa.verify');
@@ -38,10 +42,23 @@ Route::middleware('2fa.pending')->group(function () {
 Route::post('/logout', [LoginController::class, 'logout'])
     ->middleware('auth')->name('logout');
 
-// Werknemer dashboard
-Route::get('/dashboard', fn () => view('Requests.dashboard'))
+//Hier is de route naar de medewerker dashboard na het inloggen om zijn overzicht te zien
+Route::get('/dashboard', [LeaveController::class, 'dashboardOverview'])
     ->middleware('auth')
     ->name('dashboard');
+
+
+//Dit is de route naar de verlof aanvraag pagina met form en reden etc..
+Route::get('/requestdashboard', [LeaveController::class, 'dashboard'])
+    ->middleware('auth')
+    ->name('requestdashboard');
+
+Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
+
+//dat is de 2fa opnieuw stuur knopje methode
+Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])
+    ->middleware('2fa.pending')
+    ->name('2fa.resend');
 
 // Users & Roles (for admin only)
 Route::middleware('auth')->group(function () {
@@ -55,6 +72,66 @@ Route::middleware('auth')->group(function () {
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
     ->middleware('auth')
     ->name('admin.dashboard');
+
+//dit is voor het laten zien van de leave requests
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/leave-requests', [LeaveController::class, 'index'])
+        ->name('leave-requests.index');
+
+    Route::post('/leave-requests', [LeaveController::class, 'store'])
+        ->name('leave-requests.store');
+
+    Route::patch('/leave-requests/{leaveRequest}/cancel',
+        [LeaveController::class, 'cancel'])
+        ->name('leave-requests.cancel');
+
+    Route::delete('/leave-requests/{leaveRequest}',
+        [LeaveController::class, 'destroy'])
+        ->name('leave-requests.destroy');
+
+});
+
+
+Route::get('/admin/leave-requests', [LeaveApprovalController::class, 'index'])
+    ->name('admin.leave-requests.index');
+
+Route::post('/admin/leave-requests/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])
+    ->name('admin.leave-requests.approve');
+
+Route::post('/admin/leave-requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])
+    ->name('admin.leave-requests.reject');
+
+
+
+Route::get('/manager/requests', [LeaveApprovalController::class, 'index'])
+    ->middleware('auth')
+    ->name('manager.requests.index');
+
+Route::delete('/manager/requests/{leaveRequest}', [LeaveApprovalController::class, 'hide'])
+    ->middleware('auth')
+    ->name('manager.requests.hide');
+
+Route::get('/manager/requests/deleted', [LeaveApprovalController::class, 'deleted'])
+    ->middleware('auth')
+    ->name('manager.requests.deleted');
+
+Route::post('/manager/requests/{id}/restore', [LeaveApprovalController::class, 'restore'])
+    ->middleware('auth')
+    ->name('manager.requests.restore');
+
+Route::post('/manager/requests/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])
+    ->middleware('auth')
+    ->name('manager.requests.approve');
+
+Route::post('/manager/requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])
+    ->middleware('auth')
+    ->name('manager.requests.reject');
+
+
+Route::get('/manager/dashboard', function () {
+    return view('Manager.Manager-dashboard');
+})->middleware(['auth']);
 
 Route::post('/switch-role', [RoleController::class, 'switch'])
     ->name('role.switch')
@@ -72,10 +149,8 @@ Route::get('/debug-role', function (RoleService $roleService) {
     $activeRole = $roleService->getActiveRole($user);
 
     dd([
-        'active_role_id_in_session' => $activeRoleId,
-        'active_role' => $activeRole?->only(['id', 'name']),
-        'user_roles' => $user->roles()->get(['id', 'name'])->toArray(),
-        'php_version' => phpversion(),
-        'php_version_id' => PHP_VERSION_ID,
+
+        'session_role_id' => session('active_role_id'),
+        'user_roles' => auth()->user()->roles->pluck('id', 'name'),
     ]);
 })->middleware('auth');

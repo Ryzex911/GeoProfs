@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\User;
-use App\Policies\UserPolicy;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use App\Models\LeaveRequest;
+use App\Observers\LeaveRequestObserver;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,10 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if ($this->app->environment('local') && class_exists(\Laravel\Telescope\TelescopeServiceProvider::class)) {
-            $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
-            $this->app->register(TelescopeServiceProvider::class);
-        }
+        //
     }
 
     /**
@@ -30,9 +27,13 @@ class AppServiceProvider extends ServiceProvider
         Vite::prefetch(concurrency: 3);
 
         Password::defaults(function () {
-            return Password::min(8); // minimaal 6 tekens
+            return Password::min(8);
         });
 
-        Gate::policy(User::class, UserPolicy::class);
+        // HIER wordt je observer correct gekoppeld
+        LeaveRequest::observe(LeaveRequestObserver::class);
+
+        // Als je policies gebruikt
+        // Gate::policy(User::class, UserPolicy::class);
     }
 }

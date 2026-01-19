@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\LeaveRequest;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,5 +20,13 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
         ]);
+        $this->call([
+            LeaveTypeSeeder::class,
+        ]);
+
+        LeaveRequest::factory(3)->create();
+
     }
+
+
 }

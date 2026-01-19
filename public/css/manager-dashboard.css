@@ -1,0 +1,436 @@
+:root {
+    --geo-blue: #0E3A5B;
+    --geo-green: #3FB950;
+    --geo-red: #DC2626;
+    --bg: #F3F4F6;
+    --text: #0F172A;
+    --muted: #E5E7EB;
+    --card: #FFFFFF;
+    --radius: 16px;
+    --shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* Base */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Topbar */
+.topbar {
+    background: var(--card);
+    padding: 16px 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--muted);
+    margin-bottom: 24px;
+}
+
+.topbar h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.userbox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.userbox img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* Grid */
+.grid {
+    display: grid;
+    gap: 24px;
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1200px) {
+    .grid-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Card */
+.card {
+    background: var(--card);
+    border: 1px solid var(--muted);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.card__header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--muted);
+}
+
+.card__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.card__subtitle {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #6B7280;
+}
+
+.card__body {
+    padding: 20px;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 0;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.15s;
+}
+
+.btn-primary {
+    background: var(--geo-blue);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #0a2844;
+}
+
+.btn-full {
+    width: 100%;
+}
+
+.btn-approve {
+    background: var(--geo-green);
+    color: white;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 18px;
+}
+
+.btn-approve:hover {
+    background: #2ea044;
+}
+
+.btn-reject {
+    background: var(--geo-red);
+    color: white;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 18px;
+}
+
+.btn-reject:hover {
+    background: #b91c1c;
+}
+
+/* ========== VERLOF AANVRAGEN ========== */
+.leave-requests {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.leave-request-item {
+    padding: 14px;
+    border: 1px solid var(--muted);
+    border-radius: 12px;
+    background: #FAFAFA;
+}
+
+.request-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.request-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.request-info {
+    flex: 1;
+}
+
+.request-name {
+    margin: 0;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.request-type {
+    margin: 2px 0 0 0;
+    font-size: 12px;
+    color: #6B7280;
+}
+
+.request-dates {
+    margin: 0 0 10px 0;
+    font-size: 12px;
+    color: var(--text);
+}
+
+.request-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.link-all-requests {
+    color: var(--geo-blue);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 13px;
+    border-top: 1px solid var(--muted);
+    padding-top: 12px;
+    display: block;
+}
+
+.link-all-requests:hover {
+    text-decoration: underline;
+}
+
+/* ========== TEAMS ========== */
+.teams-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.team-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: #F9FAFB;
+    border-radius: 12px;
+    border: 1px solid var(--muted);
+}
+
+.team-icon {
+    font-size: 24px;
+    margin-top: 2px;
+}
+
+.team-info {
+    flex: 1;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 8px;
+    font-size: 12px;
+}
+
+.team-name {
+    margin: 0;
+    color: #6B7280;
+    font-weight: 500;
+}
+
+.team-value {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.team-project {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 12px;
+    text-align: right;
+}
+
+/* ========== KALENDER ========== */
+.calendar-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    justify-content: center;
+}
+
+.btn-nav {
+    background: var(--muted);
+    border: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.15s;
+}
+
+.btn-nav:hover {
+    background: var(--text);
+    color: white;
+}
+
+.month-select,
+.year-select {
+    padding: 8px 10px;
+    border: 1px solid var(--muted);
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.calendar {
+    margin-bottom: 16px;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.day-label {
+    text-align: center;
+    font-weight: 600;
+    font-size: 12px;
+    color: #6B7280;
+    padding: 8px 0;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--muted);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    background: white;
+    color: var(--text);
+}
+
+.calendar-day.other-month {
+    background: #F3F4F6;
+    color: #D1D5DB;
+}
+
+.calendar-day.work-day {
+    background: var(--geo-blue);
+    color: white;
+    border-color: var(--geo-blue);
+    font-weight: 600;
+}
+
+.calendar-day.work-day:hover {
+    background: #0a2844;
+}
+
+.calendar-day.off-day {
+    background: #F9FAFB;
+    color: #9CA3AF;
+}
+
+/* Werktijden */
+.schedule-times {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--muted);
+}
+
+.schedule-times h3 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.time-block {
+    background: #F0F9FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.time-block p {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.time-block p:last-child {
+    margin-bottom: 0;
+}
+
+/* Scrollbar styling */
+.leave-requests::-webkit-scrollbar {
+    width: 6px;
+}
+
+.leave-requests::-webkit-scrollbar-track {
+    background: #F3F4F6;
+    border-radius: 10px;
+}
+
+.leave-requests::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 10px;
+}
+
+.leave-requests::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
+}
