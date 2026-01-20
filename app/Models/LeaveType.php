@@ -15,6 +15,7 @@ class LeaveType extends Model
         'description',
         'requires_proof',
         'max_days',
+        'deducts_from_balance',
     ];
 
     protected $casts = [

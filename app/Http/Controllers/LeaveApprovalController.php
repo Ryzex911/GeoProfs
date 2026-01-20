@@ -38,6 +38,10 @@ class LeaveApprovalController extends Controller
             return back();
         }
 
+        // Bereken duration_hours bij goedkeuring
+        $leaveService = new LeaveService();
+        $leaveService->calculateAndSaveDurationHours($leaveRequest);
+
         $leaveRequest->update([
             'status' => LeaveRequest::STATUS_APPROVED,
             'approved_by' => auth()->id(),

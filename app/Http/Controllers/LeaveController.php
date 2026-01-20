@@ -108,7 +108,7 @@ class LeaveController extends Controller
             ->with('success', 'Verlofaanvraag is geannuleerd.');
     }
 
-// Dashboard overzicht (KPI's)
+    // Dashboard overzicht (KPI's)
     public function dashboardOverview()
     {
         $user = Auth::user();
@@ -119,6 +119,16 @@ class LeaveController extends Controller
             ->count();
 
         return view('requests.dashboard', compact('lopendeAanvragen'));
+    }
+
+    // API endpoint voor verlofsaldo
+    public function getBalance()
+    {
+        $user = Auth::user();
+        $leaveService = new LeaveService();
+        $balance = $leaveService->getRemainingHours($user->id);
+
+        return response()->json($balance);
     }
 
 }
