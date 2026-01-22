@@ -7,6 +7,9 @@ use App\Models\LeaveRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Auth;
+
 
 class LeaveApprovalController extends Controller
 {
@@ -45,7 +48,17 @@ class LeaveApprovalController extends Controller
             'opmerking' => null,
         ]);
 
-         Mail::to($leaveRequest->employee->email)->send(new LeaveRequestStatusChanged($leaveRequest));
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'Verlofaanvraag goedgekeurd',
+            'entity' => 'leave_requests',
+            'entity_id' => $leaveRequest->id,
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
+        ]);
+
+
+        Mail::to($leaveRequest->employee->email)->send(new LeaveRequestStatusChanged($leaveRequest));
 
         return back();
     }
@@ -65,6 +78,15 @@ class LeaveApprovalController extends Controller
             'approved_by' => auth()->id(),
             'approved_at' => now(),
             'opmerking'   => $note !== '' ? $note : null,
+        ]);
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'Verlofaanvraag afgewezen',
+            'entity' => 'leave_requests',
+            'entity_id' => $leaveRequest->id,
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
         ]);
 
         Mail::to($leaveRequest->employee->email)

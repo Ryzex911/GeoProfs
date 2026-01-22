@@ -7,7 +7,7 @@ use App\Models\LeaveRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\AuditLog;
 
 
 
@@ -45,6 +45,28 @@ class LeaveController extends Controller
         if ($request->hasFile('proof')) {
             $proofPath = $request->file('proof')->store('proofs', 'public');
         }
+
+        $leaveRequest = LeaveRequest::create([
+            'employee_id' => $user->id,
+            'leave_type_id' => $data['leave_type_id'],
+            'reason' => $data['reason'] ?? null,
+            'start_date' => $start->toDateString(),
+            'end_date' => $end->toDateString(),
+            'proof' => $proofPath,
+            'status' => LeaveRequest::STATUS_PENDING,
+            'submitted_at' => now(),
+            'notification_sent' => false,
+        ]);
+
+        // ✅ AUDIT TRAIL
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'Verlofaanvraag ingediend',
+            'entity' => 'leave_requests',
+            'entity_id' => $leaveRequest->id,
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
 
         $leaveRequest = LeaveRequest::create([
             'employee_id' => Auth::id(),

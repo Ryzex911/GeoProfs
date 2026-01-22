@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -154,3 +155,7 @@ Route::get('/debug-role', function (RoleService $roleService) {
         'user_roles' => auth()->user()->roles->pluck('id', 'name'),
     ]);
 })->middleware('auth');
+Route::middleware(['auth', 'role:admin'])->get(
+    '/audit-logs',
+    [AuditLogController::class, 'index']
+);
