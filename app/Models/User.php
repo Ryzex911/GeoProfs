@@ -83,6 +83,16 @@ class User extends Authenticatable
         return $this->hasMany(LeaveRequest::class, 'approved_by');
     }
 
+    /**
+     * Haal het huidige verlofsaldo op voor deze gebruiker.
+     * Geeft een array terug met remaining_hours, remaining_days, used_hours, start_hours, carryover_hours.
+     */
+    public function getLeaveBalance(): array
+    {
+        $leaveService = app(\App\Services\LeaveService::class);
+        return $leaveService->getRemainingHours($this->id);
+    }
+
     // Lock helpers
     // Controleerd of een user geblokeerd is
     public function isLocked(): bool
