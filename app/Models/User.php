@@ -41,10 +41,10 @@ class User extends Authenticatable
     }
 
     // Relationships
-    public function team()
-    {
-        return $this->belongsTo(Team::class);
-    }
+    // public function team()
+    // {
+    //     return $this->belongsTo(Team::class);
+    // }
 
     public function roles(): BelongsToMany
     {

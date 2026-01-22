@@ -6,6 +6,7 @@ use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Schema;
 
 class LeaveService
 {
