@@ -126,10 +126,15 @@ class LeaveController extends Controller
     public function getBalance()
     {
         $user = Auth::user();
-        $leaveService = new LeaveService();
-        $balance = $leaveService->getRemainingDays($user->id);
+        $year = request()->query('year', date('Y'));
+        $service = app(\App\Services\LeaveBalanceService::class);
 
-        return response()->json($balance);
+        return response()->json([
+            'year' => (int) $year,
+            'startsaldo_days' => $service->getStartSaldoDays($user, (int) $year),
+            'used_days' => $service->getUsedDays($user, (int) $year),
+            'remaining_days' => $service->getRemainingDays($user, (int) $year),
+        ]);
     }
 
 }

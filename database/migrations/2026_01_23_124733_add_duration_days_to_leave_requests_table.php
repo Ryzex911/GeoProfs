@@ -12,9 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('leave_requests', function (Blueprint $table) {
-            $table->decimal('duration_hours', 8, 2)
-                ->nullable()
-                ->after('end_date');
+            //
         });
     }
 

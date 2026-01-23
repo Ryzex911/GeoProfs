@@ -14,5 +14,5 @@ Route::get('/test', function (Request $request) {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/leave-balance', [LeaveController::class, 'getBalance']);
+    Route::get('/leave-balance', [LeaveController::class, 'getBalance'])->name('api.leave-balance');
 });

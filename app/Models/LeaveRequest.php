@@ -21,6 +21,7 @@ class LeaveRequest extends Model
         'start_date',
         'end_date',
         'duration_hours',
+        'duration_days',
         'proof',
         'status',
         'submitted_at',
