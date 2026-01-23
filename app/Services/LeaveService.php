@@ -31,9 +31,9 @@ class LeaveService
     }
 
     /**
-     * Haal gebruikte uren op voor een gebruiker in een jaar.
+     * Haal gebruikte dagen op voor een gebruiker in een jaar.
      */
-    public function getUsedHours(int $userId, int $year = null): float
+    public function getUsedDays(int $userId, int $year = null): float
     {
         $query = LeaveRequest::query()
             ->where('employee_id', $userId)
@@ -46,61 +46,56 @@ class LeaveService
             $query->whereYear('approved_at', $year);
         }
 
-        // Prefer: sum duration_hours if stored
+        // Prefer: sum duration_hours if stored, convert to days
         if (\Schema::hasColumn('leave_requests', 'duration_hours')) {
-            return (float) $query->sum('duration_hours');
+            $totalHours = (float) $query->sum('duration_hours');
+            return round($totalHours / 8.0, 2); // Convert hours to days
         }
 
-        // Fallback: compute from dates (slower)
+        // Fallback: compute from dates (slower), convert to days
         $total = 0.0;
         $holidays = config('company.holidays', []);
         foreach ($query->get() as $lr) {
             $total += $this->calculateWorkingHoursBetween($lr->start_date, $lr->end_date, $holidays);
         }
-        return round($total, 2);
+        return round($total / 8.0, 2); // Convert hours to days
     }
 
     /**
-     * Haal startsaldo uren op voor een gebruiker in een jaar.
+     * Haal startsaldo dagen op voor een gebruiker in een jaar.
      */
-    public function getStartSaldoHours(int $userId, int $year = null): float
+    public function getStartSaldoDays(int $userId, int $year = null): float
     {
-        // Voor nu: standaard 25 dagen = 200 uur
-        // TODO: pro-rata op basis van contract, startdatum gebruiker
-        $startsaldodays = 25.0;
-        $hoursPerDay = 8.0;
-        return $startsaldodays * $hoursPerDay;
-    }
-
-    /**
-     * Haal carry-over uren op voor een gebruiker in een jaar.
-     */
-    public function getCarryOverHours(int $userId, int $year = null): float
-    {
-        // Voor nu: 0, later implementeren
-        // Max 5 dagen = 40 uur
-        return 0.0;
+        // Iedereen heeft 25 dagen vrij per jaar
+        return 25.0;
     }
 
     /**
      * Haal resterend saldo op voor een gebruiker in een jaar.
+     * Berekening: remaining_days = start_days - used_days
+     * (Geen carry-over meer)
+     */
+    public function getRemainingDays(int $userId, int $year = null): array
+    {
+        $year = $year ?? date('Y');
+        $startSaldoDays = $this->getStartSaldoDays($userId, $year);
+        $used = $this->getUsedDays($userId, $year);
+
+        $remaining = round($startSaldoDays - $used, 2);
+        return [
+            'remaining_days' => max(0, $remaining),
+            'used_days' => $used,
+            'start_days' => $startSaldoDays,
+        ];
+    }
+
+    /**
+     * Alias voor backward compatibility: getRemainingHours
+     * (Geeft DAGEN terug, niet uren)
      */
     public function getRemainingHours(int $userId, int $year = null): array
     {
-        $year = $year ?? date('Y');
-        $hoursPerDay = 8.0;
-        $startSaldoHours = $this->getStartSaldoHours($userId, $year);
-        $carryOver = $this->getCarryOverHours($userId, $year);
-        $used = $this->getUsedHours($userId, $year);
-
-        $remaining = round($startSaldoHours + $carryOver - $used, 2);
-        return [
-            'remaining_hours' => max(0, $remaining),
-            'remaining_days' => round(max(0, $remaining) / $hoursPerDay, 2),
-            'used_hours' => $used,
-            'start_hours' => $startSaldoHours,
-            'carryover_hours' => $carryOver,
-        ];
+        return $this->getRemainingDays($userId, $year);
     }
 
     /**

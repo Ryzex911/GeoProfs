@@ -127,7 +127,7 @@ class LeaveController extends Controller
     {
         $user = Auth::user();
         $leaveService = new LeaveService();
-        $balance = $leaveService->getRemainingHours($user->id);
+        $balance = $leaveService->getRemainingDays($user->id);
 
         return response()->json($balance);
     }

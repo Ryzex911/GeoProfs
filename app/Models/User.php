@@ -85,12 +85,12 @@ class User extends Authenticatable
 
     /**
      * Haal het huidige verlofsaldo op voor deze gebruiker.
-     * Geeft een array terug met remaining_hours, remaining_days, used_hours, start_hours, carryover_hours.
+     * Geeft een array terug met: remaining_days, used_days, start_days
      */
     public function getLeaveBalance(): array
     {
         $leaveService = app(\App\Services\LeaveService::class);
-        return $leaveService->getRemainingHours($this->id);
+        return $leaveService->getRemainingDays($this->id);
     }
 
     // Lock helpers

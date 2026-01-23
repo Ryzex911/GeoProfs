@@ -21,25 +21,22 @@ class UserLeaveBalanceTest extends TestCase
 
         // Mock the LeaveService
         $mockService = $this->mock(LeaveService::class);
-        $mockService->shouldReceive('getRemainingHours')
+        $mockService->shouldReceive('getRemainingDays')
             ->once()
             ->with(1)
             ->andReturn([
-                'remaining_hours' => 160.0,
                 'remaining_days' => 20.0,
-                'used_hours' => 40.0,
-                'start_hours' => 200.0,
-                'carryover_hours' => 0.0,
+                'used_days' => 5.0,
+                'start_days' => 25.0,
             ]);
 
         $balance = $user->getLeaveBalance();
 
         $this->assertIsArray($balance);
-        $this->assertArrayHasKey('remaining_hours', $balance);
         $this->assertArrayHasKey('remaining_days', $balance);
-        $this->assertArrayHasKey('used_hours', $balance);
-        $this->assertArrayHasKey('start_hours', $balance);
-        $this->assertArrayHasKey('carryover_hours', $balance);
+        $this->assertArrayHasKey('used_days', $balance);
+        $this->assertArrayHasKey('start_days', $balance);
+        $this->assertEquals(20.0, $balance['remaining_days']);
     }
 
     public function test_get_leave_balance_calls_service_with_correct_user_id()
@@ -49,20 +46,18 @@ class UserLeaveBalanceTest extends TestCase
 
         // Mock the LeaveService
         $mockService = $this->mock(LeaveService::class);
-        $mockService->shouldReceive('getRemainingHours')
+        $mockService->shouldReceive('getRemainingDays')
             ->once()
             ->with(123)
             ->andReturn([
-                'remaining_hours' => 160.0,
                 'remaining_days' => 20.0,
-                'used_hours' => 40.0,
-                'start_hours' => 200.0,
-                'carryover_hours' => 0.0,
+                'used_days' => 5.0,
+                'start_days' => 25.0,
             ]);
 
         $balance = $user->getLeaveBalance();
 
-        $this->assertEquals(160.0, $balance['remaining_hours']);
         $this->assertEquals(20.0, $balance['remaining_days']);
+        $this->assertEquals(5.0, $balance['used_days']);
     }
 }

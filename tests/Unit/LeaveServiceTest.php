@@ -62,8 +62,8 @@ class LeaveServiceTest extends TestCase
             'approved_at' => now(),
         ]);
 
-        $used = $this->leaveService->getUsedHours($user->id);
-        $this->assertEquals(40.0, $used);
+        $used = $this->leaveService->getUsedDays($user->id);
+        $this->assertEquals(5.0, $used); // 40 hours / 8 = 5 days
     }
 
     public function test_get_used_hours_ignores_non_deducting_leave_types()
@@ -88,8 +88,8 @@ class LeaveServiceTest extends TestCase
             'approved_at' => now(),
         ]);
 
-        $used = $this->leaveService->getUsedHours($user->id);
-        $this->assertEquals(16.0, $used);
+        $used = $this->leaveService->getUsedDays($user->id);
+        $this->assertEquals(2.0, $used); // 16 hours / 8 = 2 days (24h ignored)
     }
 
     public function test_get_remaining_hours_calculates_correctly()
@@ -105,15 +105,14 @@ class LeaveServiceTest extends TestCase
             'approved_at' => now(),
         ]);
 
-        $balance = $this->leaveService->getRemainingHours($user->id);
+        $balance = $this->leaveService->getRemainingDays($user->id);
 
-        $this->assertEquals(160.0, $balance['remaining_hours']); // 200 - 40
-        $this->assertEquals(20.0, $balance['remaining_days']); // 160 / 8
-        $this->assertEquals(40.0, $balance['used_hours']);
-        $this->assertEquals(200.0, $balance['start_hours']);
+        $this->assertEquals(20.0, $balance['remaining_days']); // 25 - 5 days
+        $this->assertEquals(5.0, $balance['used_days']); // 40 hours / 8
+        $this->assertEquals(25.0, $balance['start_days']);
     }
 
-    public function test_get_remaining_hours_never_negative()
+    public function test_get_remaining_days_never_negative()
     {
         $user = User::factory()->create();
         $leaveType = LeaveType::factory()->create(['deducts_from_balance' => true]);
@@ -122,13 +121,12 @@ class LeaveServiceTest extends TestCase
             'employee_id' => $user->id,
             'leave_type_id' => $leaveType->id,
             'status' => LeaveRequest::STATUS_APPROVED,
-            'duration_hours' => 250.0, // More than 200
+            'duration_hours' => 250.0, // More than 200 hours = more than 25 days
             'approved_at' => now(),
         ]);
 
-        $balance = $this->leaveService->getRemainingHours($user->id);
+        $balance = $this->leaveService->getRemainingDays($user->id);
 
-        $this->assertEquals(0.0, $balance['remaining_hours']);
         $this->assertEquals(0.0, $balance['remaining_days']);
     }
 }

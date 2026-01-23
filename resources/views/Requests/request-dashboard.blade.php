@@ -110,7 +110,12 @@
         <aside class="card" aria-labelledby="sec-saldo">
             <div class="card__header"><h2 id="sec-saldo" class="card__title">Verlof saldo</h2></div>
             <div class="card__body">
-                <div class="kpi">Saldo: <b>+200 uren</b></div>
+                <div class="kpi">
+                    Saldo: <b id="saldo-days">—</b> dagen
+                </div>
+                <div style="font-size: 0.9rem; color: #666; margin-top: 8px;">
+                    Gebruikt: <span id="saldo-used">—</span> dagen
+                </div>
             </div>
         </aside>
     </div>
@@ -331,6 +336,38 @@
         rangeEnd = null;
         renderRange();
     });
+
+    /* ========== SALDO LADEN ========== */
+    async function loadLeaveBalance() {
+        try {
+            const response = await fetch("{{ route('api.leave-balance') }}", {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const saloDaysEl = document.getElementById('saldo-days');
+                const usedDaysEl = document.getElementById('saldo-used');
+
+                if (saloDaysEl) {
+                    saloDaysEl.textContent = Math.round(data.remaining_days * 10) / 10;
+                }
+                if (usedDaysEl) {
+                    usedDaysEl.textContent = Math.round(data.used_days * 10) / 10;
+                }
+            } else {
+                console.error('Saldo laden mislukt:', response.status);
+            }
+        } catch (error) {
+            console.error('Fout bij laden saldo:', error);
+        }
+    }
+
+    // Laad saldo bij pagina-laden
+    document.addEventListener('DOMContentLoaded', loadLeaveBalance);
 </script>
 
 
