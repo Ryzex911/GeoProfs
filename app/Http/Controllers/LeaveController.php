@@ -7,13 +7,10 @@ use App\Models\LeaveRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Models\AuditLog;
-
-
 
 class LeaveController extends Controller
 {
-// overzicht (Inertia)
+    // Overzicht
     public function index()
     {
         $user = Auth::user();
@@ -24,7 +21,7 @@ class LeaveController extends Controller
         return view('leave.index', compact('Requests'));
     }
 
-// Toon dashboard view (blade)
+    // Toon dashboard view (blade)
     public function dashboard()
     {
         $leaveTypes = \App\Models\LeaveType::all();
@@ -35,54 +32,60 @@ class LeaveController extends Controller
     public function store(StoreLeaveRequestRequest $request)
     {
         $user = Auth::user();
-        // StoreLeaveRequest wordt gebruikt om bedrijfsregels te valideren
         $data = $request->validated();
 
-        $start = Carbon::parse($data['start_date']);
-        $end = Carbon::parse($data['end_date']);
+        $start = Carbon::parse($data['start_date'])->toDateString();
+        $end   = Carbon::parse($data['end_date'])->toDateString();
 
         $proofPath = null;
         if ($request->hasFile('proof')) {
             $proofPath = $request->file('proof')->store('proofs', 'public');
         }
 
+        // ✅ Extra bescherming tegen dubbele submits (zelfde periode binnen 60 sec)
+        $duplicate = LeaveRequest::where('employee_id', $user->id)
+            ->where('leave_type_id', $data['leave_type_id'])
+            ->where('start_date', $start)
+            ->where('end_date', $end)
+            ->where('status', LeaveRequest::STATUS_PENDING)
+            ->where('created_at', '>=', now()->subMinute())
+            ->exists();
+
+        if ($duplicate) {
+            // Als het een AJAX call is:
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Deze verlofaanvraag is zojuist al ingediend. Probeer niet dubbel te versturen.',
+                ], 409);
+            }
+
+            return redirect()->back()->with('error', 'Deze verlofaanvraag is zojuist al ingediend. Probeer niet dubbel te versturen.');
+        }
+
+        // ✅ 1x create (niet dubbel!)
         $leaveRequest = LeaveRequest::create([
             'employee_id' => $user->id,
             'leave_type_id' => $data['leave_type_id'],
             'reason' => $data['reason'] ?? null,
-            'start_date' => $start->toDateString(),
-            'end_date' => $end->toDateString(),
+            'start_date' => $start,
+            'end_date' => $end,
             'proof' => $proofPath,
             'status' => LeaveRequest::STATUS_PENDING,
             'submitted_at' => now(),
             'notification_sent' => false,
         ]);
 
-        // ✅ AUDIT TRAIL
-        AuditLog::create([
-            'user_id' => $user->id,
-            'action' => 'Verlofaanvraag ingediend',
-            'entity' => 'leave_requests',
-            'entity_id' => $leaveRequest->id,
-            'ip_address' => $request->ip(),
-            'created_at' => now(),
-        ]);
+        // ✅ NIET meer handmatig AuditLog::create hier.
+        // Audit gebeurt via LeaveRequestObserver (leave_request.created)
+        Log::info('Leave request created', ['user_id' => $user->id, 'leave_request_id' => $leaveRequest->id]);
 
-        $leaveRequest = LeaveRequest::create([
-            'employee_id' => Auth::id(),
-            'leave_type_id' => $data['leave_type_id'],
-            'reason' => $data['reason'] ?? null,
-            'start_date' => $start->toDateString(),
-            'end_date' => $end->toDateString(),
-            'proof' => $proofPath,
-            'status' => LeaveRequest::STATUS_PENDING,
-            'submitted_at' => now(),
-            'notification_sent' => false,
-        ]);
+        // Return JSON voor AJAX; fallback redirect voor normale form submit
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'leave_request' => $leaveRequest], 201);
+        }
 
-        Log::info('Verlofaanvraag ingediend', ['user_id' => $user->id, 'leave_request_id' => $leaveRequest->id]);
-
-        return response()->json(['success' => true, 'leave_request' => $leaveRequest], 201);
+        return redirect()->route('leave-requests.index')->with('success', 'Verlofaanvraag ingediend.');
     }
 
     public function destroy(LeaveRequest $leaveRequest)
@@ -97,50 +100,44 @@ class LeaveController extends Controller
             return redirect()->back();
         }
 
-
-        // Soft delete
         $leaveRequest->delete();
 
         return redirect()->route('leave-requests.index')
             ->with('success', 'Verlofaanvraag verwijderd.');
     }
 
-
     // Annuleer een verlofaanvraag
     public function cancel(LeaveRequest $leaveRequest)
     {
         $user = Auth::user();
 
-        // Beveiliging: alleen eigen aanvraag
         if ($leaveRequest->employee_id !== $user->id) {
             abort(403, 'Geen toegang');
         }
 
-        // Alleen annuleren als status ingediend is
         if ($leaveRequest->status !== LeaveRequest::STATUS_PENDING) {
             return redirect()->back();
         }
 
         $leaveRequest->status = LeaveRequest::STATUS_CANCELED;
         $leaveRequest->canceled_at = now();
-
         $leaveRequest->save();
+
+        // Audit + mail gebeurt in LeaveRequestObserver via status change
 
         return redirect()->back()
             ->with('success', 'Verlofaanvraag is geannuleerd.');
     }
 
-// Dashboard overzicht (KPI's)
+    // Dashboard overzicht (KPI's)
     public function dashboardOverview()
     {
         $user = Auth::user();
 
-        // Aantal lopende aanvragen van deze gebruiker
         $lopendeAanvragen = LeaveRequest::where('employee_id', $user->id)
             ->where('status', LeaveRequest::STATUS_PENDING)
             ->count();
 
         return view('requests.dashboard', compact('lopendeAanvragen'));
     }
-
 }
