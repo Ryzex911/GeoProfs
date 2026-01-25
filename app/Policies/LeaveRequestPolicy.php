@@ -12,17 +12,17 @@ class LeaveRequestPolicy
      */
     public function leaveApprovePage(User $user): bool
     {
-        return $user->activeRoleIs(['manager', 'projectleider']);
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
     }
 
     public function approve(User $user): bool
     {
-        return $user->activeRoleIs(['manager', 'projectleider']);
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
     }
 
     public function reject(User $user): bool
     {
-        return $user->activeRoleIs(['manager', 'projectleider']);
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
     }
 
 

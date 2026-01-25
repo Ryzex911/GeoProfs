@@ -11,6 +11,17 @@
     <title>Verlofaanvragen beoordelen — GeoProfs</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/manager-requests.css') }}">
+
+    {{-- Kleine fixes zonder je CSS kapot te maken --}}
+    <style>
+        .actions-cell{ white-space:nowrap; }
+        .actions-cell form{ display:inline-block; margin-right:8px; }
+        .btn-chip{ cursor:pointer; }
+        @media (max-width: 900px){
+            .table-wrap{ overflow:auto; }
+            table{ min-width: 980px; } /* houdt kolommen netjes op mobiel */
+        }
+    </style>
 </head>
 <body>
 
@@ -67,6 +78,7 @@
 
     <!-- Hoofd card -->
     <section class="card" aria-label="Lijst met verlofaanvragen">
+
         <!-- Filters -->
         <div class="filter-row">
             <div class="field">
@@ -117,6 +129,7 @@
                     <th>Reden</th>
                     <th>Periode</th>
                     <th>Uren</th>
+                    <th>Bewijs</th>
                     <th>Status</th>
                     <th>Acties</th>
                 </tr>
@@ -146,11 +159,15 @@
                             default => 'status-pending',
                         };
 
-                        $start = $request->start_date?->format('d M Y H:i') ?? '-';
-                        $end   = $request->end_date?->format('d M Y H:i') ?? '-';
+                        // veilig parsen (string of Carbon)
+                        $startObj = $request->start_date ? \Carbon\Carbon::parse($request->start_date) : null;
+                        $endObj   = $request->end_date   ? \Carbon\Carbon::parse($request->end_date)   : null;
 
-                        $hours = ($request->start_date && $request->end_date)
-                            ? round($request->start_date->diffInMinutes($request->end_date) / 60, 2)
+                        $start = $startObj ? $startObj->format('d M Y H:i') : '-';
+                        $end   = $endObj   ? $endObj->format('d M Y H:i')   : '-';
+
+                        $hours = ($startObj && $endObj)
+                            ? round($startObj->diffInMinutes($endObj) / 60, 2)
                             : 0;
 
                         $isPending = ($request->status === LeaveRequest::STATUS_PENDING);
@@ -161,6 +178,8 @@
                             LeaveRequest::STATUS_CANCELED,
                         ], true);
 
+                        // Bewijs knop tonen als er iets is (file of link in tekst)
+                        $hasAnythingProof = !empty($request->proof) || !empty($request->reason) || !empty($request->opmerking);
                     @endphp
 
                     <tr
@@ -170,7 +189,7 @@
                         data-status="{{ $request->status }}"
                         data-is-pending="{{ $isPending ? '1' : '0' }}"
                         data-reason="{{ strtolower($reasonLabel) }}"
-                        data-start="{{ $request->start_date?->format('Y-m-d') }}"
+                        data-start="{{ $startObj?->format('Y-m-d') }}"
                     >
                         <td>
                             <div class="name-cell">
@@ -183,8 +202,42 @@
                         </td>
 
                         <td><span class="reason-pill">{{ $reasonLabel }}</span></td>
+
                         <td>{{ $start }} — {{ $end }}</td>
+
                         <td>{{ rtrim(rtrim(number_format($hours, 2), '0'), '.') }} uur</td>
+
+                        @php
+                            // Alleen bewijs tonen als het verloftype bewijs vereist
+                            $requiresProof = (bool) ($request->leaveType?->requires_proof ?? false);
+
+                            $proof = $request->proof ?? null; // kan file-path zijn of URL
+                            $proofUrl = null;
+
+                            if ($proof) {
+                                $proofUrl = str_starts_with($proof, 'http')
+                                    ? $proof
+                                    : asset('storage/' . ltrim($proof, '/'));
+                            }
+
+                            $isExternal = $proofUrl && str_starts_with($proofUrl, 'http') && !str_contains($proofUrl, '/storage/');
+                        @endphp
+
+                        <td>
+                            @if($requiresProof)
+                            @if($hasAnythingProof)
+                                <a class="btn-chip" style="text-decoration:none;"
+                                   href="{{ route('manager.requests.proof', $request) }}">
+                                    Bekijk bewijs
+                                </a>
+                            @else
+
+                            @endif
+
+                            @else
+                                <span style="opacity:.7;,">—</span>
+                            @endif
+                        </td>
 
                         <td>
                             <span class="status-pill {{ $statusClass }}">{{ $statusLabel }}</span>
@@ -193,30 +246,28 @@
                         <td class="actions-cell">
                             @if($isDeletedView)
                                 {{-- VERWIJDERDE VIEW: herstellen --}}
-                                <form method="POST" action="{{ route('manager.requests.restore', $request->id) }}" style="display:inline;">
+                                <form method="POST" action="{{ route('manager.requests.restore', $request->id) }}">
                                     @csrf
                                     <button class="btn-chip" type="submit">Herstellen</button>
                                 </form>
 
                                 {{-- Permanent verwijderen: alleen tonen als route bestaat --}}
                                 @if(\Illuminate\Support\Facades\Route::has('manager.requests.forceDelete'))
-                                    <form method="POST" action="{{ route('manager.requests.forceDelete', $request->id) }}" style="display:inline;">
+                                    <form method="POST" action="{{ route('manager.requests.forceDelete', $request->id) }}">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn-chip btn-decline" type="submit">Permanent verwijderen</button>
                                     </form>
                                 @endif
+
                             @else
                                 {{-- NORMALE VIEW --}}
                                 @if($isPending)
-                                    @can('approve', $request)
-                                    <form method="POST" action="{{ route('manager.requests.approve', $request) }}" style="display:inline;">
+                                    {{-- Knoppen altijd tonen (authorize gebeurt al in controller/policy) --}}
+                                    <form method="POST" action="{{ route('manager.requests.approve', $request) }}">
                                         @csrf
                                         <button class="btn-chip btn-approve" type="submit">Goedkeuren</button>
                                     </form>
-                                    @endcan
-
-                                    @can('reject', $request)
 
                                     <button class="btn-chip btn-decline" type="button">
                                         Afkeuren
@@ -227,16 +278,14 @@
                                         @csrf
                                         <input type="hidden" name="reason" value="">
                                     </form>
-                                    @endcan
 
                                 @elseif($canSoftDeleteAfterReview)
-                                    {{-- SOFT DELETE (pas na goedkeurd/afgekeurd) --}}
-                                    <form method="POST" action="{{ route('manager.requests.hide', $request) }}" style="display:inline;">
+                                    {{-- SOFT DELETE (pas na reviewed) --}}
+                                    <form method="POST" action="{{ route('manager.requests.hide', $request) }}">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn-chip" type="submit">Verwijderen</button>
                                     </form>
-
                                 @else
                                     <span style="opacity:.7;">—</span>
                                 @endif
@@ -245,7 +294,9 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6">{{ $isDeletedView ? 'Geen verwijderde aanvragen.' : 'Geen aanvragen gevonden.' }}</td>
+                        <td colspan="7">
+                            {{ $isDeletedView ? 'Geen verwijderde aanvragen.' : 'Geen aanvragen gevonden.' }}
+                        </td>
                     </tr>
                 @endforelse
                 </tbody>
@@ -304,11 +355,11 @@
             const declineBtn = e.target.closest('.btn-decline');
             if (!declineBtn) return;
 
+            // alleen reageren op pending "Afkeuren" knop (niet op delete/other)
             const row = declineBtn.closest('tr');
             const requestId = row?.dataset?.requestId || null;
             const isPending = row?.dataset?.isPending === '1';
 
-            // Alleen modal openen bij pending (anders is het bv. een andere decline-knop)
             if (!requestId || !isPending) return;
 
             activeRequestId = requestId;

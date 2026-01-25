@@ -154,3 +154,8 @@ Route::get('/debug-role', function (RoleService $roleService) {
         'user_roles' => auth()->user()->roles->pluck('id', 'name'),
     ]);
 })->middleware('auth');
+
+Route::get('/manager/requests/{leaveRequest}/proof', [LeaveApprovalController::class, 'proof'])
+    ->middleware('auth')
+    ->name('manager.requests.proof');
+
