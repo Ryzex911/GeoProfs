@@ -39,6 +39,8 @@ class LeaveRequest extends Model
         'approved_at' => 'datetime',
         'canceled_at' => 'datetime',
         'notification_sent' => 'boolean',
+        'duration_hours' => 'float',
+        'duration_days' => 'float',
     ];
 
     // Status constants

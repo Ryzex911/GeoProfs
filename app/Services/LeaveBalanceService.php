@@ -6,6 +6,7 @@ use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -13,6 +14,53 @@ use Illuminate\Support\Facades\Schema;
  */
 class LeaveBalanceService
 {
+    protected float $hoursPerDay = 8.0;
+
+    /**
+     * Bereken het aantal werkuren tussen twee datums
+     * Excludeert weekenden (zaterdag, zondag)
+     * Formule: werkdagen × 8 uur/dag
+     */
+    public function calculateDurationHours(LeaveRequest $leaveRequest): float
+    {
+        $startDate = Carbon::parse($leaveRequest->start_date)->startOfDay();
+        $endDate = Carbon::parse($leaveRequest->end_date)->startOfDay();
+
+        // Als einde voor begin, return 0
+        if ($endDate->lessThan($startDate)) {
+            return 0.0;
+        }
+
+        // Bereken werkdagen (excl. weekenden)
+        $period = CarbonPeriod::create($startDate, $endDate);
+        $workDays = 0;
+
+        foreach ($period as $day) {
+            // Skip zaterdag (6) en zondag (7)
+            if ($day->isWeekend()) {
+                continue;
+            }
+            $workDays++;
+        }
+
+        return round($workDays * $this->hoursPerDay, 2);
+    }
+
+    /**
+     * Haal het totaal aantal gebruikte uren op voor een gebruiker in een bepaald jaar
+     * Telt alleen goedgekeurd verlof mee dat van saldo aftrekt
+     */
+    public function getUsedHours(int $userId, ?int $year = null): float
+    {
+        $year = $year ?? date('Y');
+
+        return (float) LeaveRequest::where('employee_id', $userId)
+            ->where('status', 'approved')  // alleen goedgekeurd
+            ->whereHas('leaveType', fn($q) => $q->where('deducts_from_balance', true))
+            ->whereYear('approved_at', $year)
+            ->sum('duration_hours') ?? 0;
+    }
+
     /**
      * Startsaldo in dagen voor een gebruiker in een jaar.
      * Fulltime = 25 dagen. Pro-rata op basis van contract_fte and start_date.
@@ -85,5 +133,32 @@ class LeaveBalanceService
         $used = $this->getUsedDays($user, $year);
 
         return round(max(0, $start - $used), 4);
+    }
+
+    /**
+     * Haal het totale verlofsaldo op voor een gebruiker als array
+     * Dit is handig voor API responses
+     */
+    public function getRemainingForUser(User|int $user, ?int $year = null): array
+    {
+        if (is_int($user)) {
+            $user = User::find($user);
+        }
+
+        $year = $year ?? date('Y');
+
+        $startDays = $this->getStartSaldoDays($user, $year);
+        $usedDays = $this->getUsedDays($user, $year);
+        $remainingDays = $this->getRemainingDays($user, $year);
+
+        return [
+            'remaining_days' => $remainingDays,
+            'remaining_hours' => round($remainingDays * $this->hoursPerDay, 2),
+            'start_days' => round($startDays, 4),
+            'start_hours' => round($startDays * $this->hoursPerDay, 2),
+            'used_days' => round($usedDays, 4),
+            'used_hours' => round($usedDays * $this->hoursPerDay, 2),
+            'year' => $year,
+        ];
     }
 }
