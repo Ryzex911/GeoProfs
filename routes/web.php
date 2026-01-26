@@ -144,4 +144,34 @@ Route::prefix('admin')
     });
 Route::get('/manager/requests/{leaveRequest}/proof', [LeaveApprovalController::class, 'proof'])
     ->middleware('auth')
-    ->name('manager.requests.proof');
+    ->name('manager.requests.approve');
+
+Route::post('/manager/requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])
+    ->middleware('auth')
+    ->name('manager.requests.reject');
+
+
+Route::get('/manager/dashboard', function () {
+    return view('Manager.Manager-dashboard');
+})->middleware(['auth']);
+
+Route::post('/switch-role', [RoleController::class, 'switch'])
+    ->name('role.switch')
+    ->middleware('auth');
+
+
+Route::get('/debug-role', function (RoleService $roleService) {
+    $user = auth()->user();
+
+    if (!$user) {
+        return 'Niet ingelogd';
+    }
+
+    $activeRoleId = $roleService->getActiveRoleId();
+    $activeRole = $roleService->getActiveRole($user);
+
+    dd([
+        \App\Models\LeaveType::where('name', \App\Models\LeaveType::REASON)->value('id')
+
+    ]);
+})->middleware('auth');
