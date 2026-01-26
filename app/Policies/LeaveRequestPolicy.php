@@ -8,22 +8,18 @@ use App\Models\User;
 class LeaveRequestPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Manager board openen
      */
     public function leaveApprovePage(User $user): bool
     {
-        return $user->activeRoleIs(['manager', 'projectleider']);
+        // ✅ Niet afhankelijk van active_role_id, maar echte rollen
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
     }
 
-    public function approve(User $user): bool
-    {
-        return $user->activeRoleIs(['manager', 'projectleider']);
-    }
 
-    public function reject(User $user): bool
-    {
-        return $user->activeRoleIs(['manager', 'projectleider']);
-    }
+
+
 
 
     /**
@@ -35,42 +31,18 @@ class LeaveRequestPolicy
     }
 
     /**
-     * Determine whether the user can create models.
+     * Approve (manager/projectleider/admin)
      */
-    public function create(User $user): bool
+    public function approve(User $user, LeaveRequest $leaveRequest): bool
     {
-        return false;
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Reject (manager/projectleider/admin)
      */
-    public function update(User $user, LeaveRequest $leaveRequest): bool
+    public function reject(User $user, LeaveRequest $leaveRequest): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, LeaveRequest $leaveRequest): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, LeaveRequest $leaveRequest): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, LeaveRequest $leaveRequest): bool
-    {
-        return false;
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
     }
 }

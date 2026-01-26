@@ -4,6 +4,8 @@ use App\Http\Middleware\EnsureActiveRole;
 use App\Http\Middleware\EnsureTwoFactorIsPending;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RequestIdMiddleware;
+use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,24 +19,26 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // 1️⃣ Alias registreren (zodat '2fa.pending' werkt in routes)
+
+        // ✅ Route middleware aliases (gebruik je in routes/web.php)
         $middleware->alias([
             '2fa.pending' => EnsureTwoFactorIsPending::class,
+            'role'        => RoleMiddleware::class, // maakt 'role:admin' mogelijk
         ]);
 
-        // 2️⃣ Optionele cookie-excepties
+        // ✅ Optionele cookie-excepties
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
-        // 3️⃣ Web-middleware toevoegen (één keer)
+        // ✅ Web middleware chain (in volgorde)
         $middleware->web(append: [
+            RequestIdMiddleware::class,            // ⬅️ stap 4: request_id voor audit correlatie
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            EnsureActiveRole::class
+            EnsureActiveRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })
     ->create();
-

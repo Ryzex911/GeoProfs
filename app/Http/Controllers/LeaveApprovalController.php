@@ -7,6 +7,9 @@ use App\Models\LeaveRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Auth;
+
 
 class LeaveApprovalController extends Controller
 {
@@ -45,7 +48,17 @@ class LeaveApprovalController extends Controller
             'opmerking' => null,
         ]);
 
-         Mail::to($leaveRequest->employee->email)->send(new LeaveRequestStatusChanged($leaveRequest));
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'Verlofaanvraag goedgekeurd',
+            'entity' => 'leave_requests',
+            'entity_id' => $leaveRequest->id,
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
+        ]);
+
+
+        Mail::to($leaveRequest->employee->email)->send(new LeaveRequestStatusChanged($leaveRequest));
 
         return back();
     }
@@ -65,6 +78,15 @@ class LeaveApprovalController extends Controller
             'approved_by' => auth()->id(),
             'approved_at' => now(),
             'opmerking'   => $note !== '' ? $note : null,
+        ]);
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'Verlofaanvraag afgewezen',
+            'entity' => 'leave_requests',
+            'entity_id' => $leaveRequest->id,
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
         ]);
 
         Mail::to($leaveRequest->employee->email)
@@ -130,4 +152,24 @@ class LeaveApprovalController extends Controller
 
         return [$kpiOpen, $kpiReviewedToday, $kpiMonthTotal];
     }
+
+
+    // in LeaveApprovalController
+    public function proof(LeaveRequest $leaveRequest)
+    {
+        $this->authorize('leaveApprovePage', LeaveRequest::class);
+
+        app(\App\Services\AuditLogger::class)->log(
+            action: 'leave_request.proof.viewed',
+            auditable: $leaveRequest,
+            oldValues: null,
+            newValues: ['has_proof' => (bool) $leaveRequest->proof],
+            logType: 'audit',
+            description: 'Bewijs bekeken'
+        );
+
+        return view('Requests.manager-proof', compact('leaveRequest'));
+    }
+
+
 }

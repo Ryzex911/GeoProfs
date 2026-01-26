@@ -67,6 +67,8 @@ class User extends Authenticatable
 
         if (!$roleId) return false;
 
+        $roles = is_array($roles) ? $roles : [$roles];
+
         return $this->roles()
             ->where('roles.id', $roleId)
             ->whereIn('roles.name', $roles)
