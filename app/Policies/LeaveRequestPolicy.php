@@ -17,15 +17,9 @@ class LeaveRequestPolicy
         return $user->hasRole(['admin', 'manager', 'projectleider']);
     }
 
-    public function approve(User $user): bool
-    {
-        return $user->hasRole(['admin', 'manager', 'projectleider']);
-    }
 
-    public function reject(User $user): bool
-    {
-        return $user->hasRole(['admin', 'manager', 'projectleider']);
-    }
+
+
 
 
     /**

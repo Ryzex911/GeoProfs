@@ -16,7 +16,7 @@ class UserPolicy
     }
 
     /**
-     * Bepaal of de gebruiker rollen mag aanpassen
+     * Bepaal of de gebruiker rollen    mag aanpassen
      * Alleen admins hebben toegang
      */
     public function updateRoles(User $user): bool

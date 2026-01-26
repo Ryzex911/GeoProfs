@@ -142,3 +142,6 @@ Route::prefix('admin')
         Route::post('/leave-requests/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])->name('admin.leave-requests.approve');
         Route::post('/leave-requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])->name('admin.leave-requests.reject');
     });
+Route::get('/manager/requests/{leaveRequest}/proof', [LeaveApprovalController::class, 'proof'])
+    ->middleware('auth')
+    ->name('manager.requests.proof');
