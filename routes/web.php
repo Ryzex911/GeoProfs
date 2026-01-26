@@ -149,8 +149,7 @@ Route::get('/debug-role', function (RoleService $roleService) {
     $activeRole = $roleService->getActiveRole($user);
 
     dd([
+        \App\Models\LeaveType::where('name', \App\Models\LeaveType::REASON)->value('id')
 
-        'session_role_id' => session('active_role_id'),
-        'user_roles' => auth()->user()->roles->pluck('id', 'name'),
     ]);
 })->middleware('auth');

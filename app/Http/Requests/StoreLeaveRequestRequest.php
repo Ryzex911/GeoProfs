@@ -31,9 +31,16 @@ class StoreLeaveRequestRequest extends FormRequest
      */
     public function rules(): array
     {
+        $reasonId = LeaveType::where('name', 'Anders')->value('id');
+
         return [
             'leave_type_id' => ['required', 'integer', 'exists:leave_types,id'],
-            'reason' => ['nullable', 'string', 'max:255'],
+            'reason' => [
+                'nullable',
+                'string',
+                'max:255',
+                'required_if:leave_type_id,' . $reasonId,
+            ],
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'proof' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
