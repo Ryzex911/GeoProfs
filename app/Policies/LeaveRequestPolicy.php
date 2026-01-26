@@ -14,6 +14,26 @@ class LeaveRequestPolicy
     {
         // ✅ Niet afhankelijk van active_role_id, maar echte rollen
         return $user->hasRole(['admin', 'manager', 'projectleider']);
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
+    }
+
+    public function approve(User $user): bool
+    {
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
+    }
+
+    public function reject(User $user): bool
+    {
+        return $user->hasRole(['admin', 'manager', 'projectleider']);
+    }
+
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view(User $user, LeaveRequest $leaveRequest): bool
+    {
+        return false;
     }
 
     /**

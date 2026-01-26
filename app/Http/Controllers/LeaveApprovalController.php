@@ -152,4 +152,24 @@ class LeaveApprovalController extends Controller
 
         return [$kpiOpen, $kpiReviewedToday, $kpiMonthTotal];
     }
+
+
+    // in LeaveApprovalController
+    public function proof(LeaveRequest $leaveRequest)
+    {
+        $this->authorize('leaveApprovePage', LeaveRequest::class);
+
+        app(\App\Services\AuditLogger::class)->log(
+            action: 'leave_request.proof.viewed',
+            auditable: $leaveRequest,
+            oldValues: null,
+            newValues: ['has_proof' => (bool) $leaveRequest->proof],
+            logType: 'audit',
+            description: 'Bewijs bekeken'
+        );
+
+        return view('Requests.manager-proof', compact('leaveRequest'));
+    }
+
+
 }
