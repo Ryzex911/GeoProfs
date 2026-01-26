@@ -108,7 +108,7 @@
 
         <!-- 3) Saldo -->
         <aside class="card" aria-labelledby="sec-saldo">
-            <div class="card__header"><h2 id="sec-saldo" class="card__title">Verlof saldo 2026</h2></div>
+            <div class="card__header"><h2 id="sec-saldo" class="card__title">Mijn verlofsaldo</h2></div>
             <div class="card__body">
                 <!-- Saldo KPI (groot getal) -->
                 <div class="kpi" style="text-align: center; margin-bottom: 24px;">
@@ -116,18 +116,8 @@
                     <div style="font-size: 2.5rem; font-weight: 700; color: #2563eb;">
                         <span id="saldo-days">—</span> <span style="font-size: 1.2rem;">dagen</span>
                     </div>
-                </div>
-
-                <!-- Progress Bar -->
-                <div style="margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 0.85rem; color: #666;">Voortgang</span>
-                        <span style="font-size: 0.85rem; font-weight: 600; color: #333;">
-                            <span id="saldo-used">—</span> / <span id="saldo-start">25</span> dagen
-                        </span>
-                    </div>
-                    <div style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
-                        <div id="saldo-progress" style="height: 100%; background: #dc2626; width: 0%; transition: width 0.3s ease;"></div>
+                    <div style="font-size: 1rem; color: #666; margin-top: 4px;">
+                        (<span id="saldo-hours">—</span> uur)
                     </div>
                 </div>
 

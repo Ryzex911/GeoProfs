@@ -62,27 +62,23 @@ class LeaveApprovalController extends Controller
             return back()->with('error', 'Je hebt geen rechten om dit verzoek goed te keuren.');
         }
 
-        // Calculate duration_hours if not set
-        if (!$leaveRequest->duration_hours) {
-            $leaveRequest->duration_hours = $this->leaveBalanceService->calculateDurationHours($leaveRequest);
-        }
-
-        // Approve the request
-        $leaveRequest->status = 'approved';
-        $leaveRequest->approved_at = now();
-        $leaveRequest->approved_by = auth()->id();
-        $leaveRequest->save();
-
-        // Send notification email
         try {
-            Mail::to($leaveRequest->employee->email)->send(
-                new LeaveRequestStatusChanged($leaveRequest, 'approved')
-            );
-        } catch (\Exception $e) {
-            \Log::error('Failed to send approval email: ' . $e->getMessage());
-        }
+            // Use service to approve and update balance
+            $this->leaveBalanceService->approveLeaveRequest($leaveRequest->id, auth()->id());
 
-        return back()->with('success', 'Verlofverzoek goedgekeurd.');
+            // Send notification email
+            try {
+                Mail::to($leaveRequest->employee->email)->send(
+                    new LeaveRequestStatusChanged($leaveRequest, 'approved')
+                );
+            } catch (\Exception $e) {
+                \Log::error('Failed to send approval email: ' . $e->getMessage());
+            }
+
+            return back()->with('success', 'Verlofverzoek goedgekeurd.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Fout bij goedkeuren: ' . $e->getMessage());
+        }
     }
 
     /**

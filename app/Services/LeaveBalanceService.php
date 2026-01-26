@@ -5,16 +5,19 @@ namespace App\Services;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Models\User;
+use App\Models\LeaveBalance;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Minimal LeaveBalanceService for US007 (days-only, no carry-over)
+ * LeaveBalanceService for US007 - Database-driven balance management
  */
 class LeaveBalanceService
 {
     protected float $hoursPerDay = 8.0;
+    protected bool $allowNegative = true;
 
     /**
      * Bereken het aantal werkuren tussen twee datums
@@ -136,7 +139,7 @@ class LeaveBalanceService
     }
 
     /**
-     * Haal het totale verlofsaldo op voor een gebruiker als array
+     * Haal het totale verlofsaldo op voor een gebruiker als array uit de database
      * Dit is handig voor API responses
      */
     public function getRemainingForUser(User|int $user, ?int $year = null): array
@@ -147,18 +150,84 @@ class LeaveBalanceService
 
         $year = $year ?? date('Y');
 
-        $startDays = $this->getStartSaldoDays($user, $year);
-        $usedDays = $this->getUsedDays($user, $year);
-        $remainingDays = $this->getRemainingDays($user, $year);
+        // Haal of maak balance record uit database
+        $balance = LeaveBalance::firstOrCreate(
+            ['user_id' => $user->id, 'year' => $year],
+            [
+                'remaining_hours' => 200.0, // 25 dagen × 8 uur
+                'carryover_hours' => 0.0,
+            ]
+        );
+
+        // Bereken startsaldo in uren (pro-rata mogelijk)
+        $startHours = $this->getStartSaldoDays($user, $year) * $this->hoursPerDay;
+
+        // Gebruikte uren uit goedgekeurde aanvragen
+        $usedHours = $this->getUsedHours($user->id, $year);
+
+        // Resterend = start + carryover - gebruikt
+        $remainingHours = $startHours + $balance->carryover_hours - $usedHours;
 
         return [
-            'remaining_days' => $remainingDays,
-            'remaining_hours' => round($remainingDays * $this->hoursPerDay, 2),
-            'start_days' => round($startDays, 4),
-            'start_hours' => round($startDays * $this->hoursPerDay, 2),
-            'used_days' => round($usedDays, 4),
-            'used_hours' => round($usedDays * $this->hoursPerDay, 2),
+            'remaining_days' => round($remainingHours / $this->hoursPerDay, 2),
+            'remaining_hours' => round($remainingHours, 2),
+            'start_days' => round($startHours / $this->hoursPerDay, 2),
+            'start_hours' => round($startHours, 2),
+            'used_days' => round($usedHours / $this->hoursPerDay, 2),
+            'used_hours' => round($usedHours, 2),
+            'carryover_hours' => round($balance->carryover_hours, 2),
             'year' => $year,
         ];
+    }
+
+    /**
+     * Keur een verlofaanvraag goed en update saldo
+     */
+    public function approveLeaveRequest(int $leaveRequestId, int $managerId): void
+    {
+        DB::transaction(function() use ($leaveRequestId, $managerId) {
+            $leaveRequest = LeaveRequest::findOrFail($leaveRequestId);
+
+            if ($leaveRequest->status !== LeaveRequest::STATUS_PENDING) {
+                throw new \Exception('Alleen ingediende aanvragen kunnen worden goedgekeurd');
+            }
+
+            // Bereken duur in uren
+            $durationHours = $this->calculateDurationHours($leaveRequest);
+
+            $year = Carbon::parse($leaveRequest->start_date)->year;
+
+            // Haal balance record (lock voor concurrency)
+            $balance = LeaveBalance::where('user_id', $leaveRequest->employee_id)
+                ->where('year', $year)
+                ->lockForUpdate()
+                ->first();
+
+            // Als geen balance, maak aan met 200 uur (25 dagen)
+            if (!$balance) {
+                $balance = LeaveBalance::create([
+                    'user_id' => $leaveRequest->employee_id,
+                    'year' => $year,
+                    'remaining_hours' => 200.0,
+                    'carryover_hours' => 0.0,
+                ]);
+            }
+
+            // Controleer of genoeg saldo (als negatief niet toegestaan)
+            if (!$this->allowNegative && $balance->remaining_hours < $durationHours) {
+                throw new \Exception('Onvoldoende verlofsaldo');
+            }
+
+            // Update balance
+            $balance->remaining_hours -= $durationHours;
+            $balance->save();
+
+            // Update leave request
+            $leaveRequest->status = LeaveRequest::STATUS_APPROVED;
+            $leaveRequest->approved_at = now();
+            $leaveRequest->approved_by = $managerId;
+            $leaveRequest->duration_hours = $durationHours;
+            $leaveRequest->save();
+        });
     }
 }

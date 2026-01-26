@@ -36,7 +36,7 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
-        $failedAttempts = LoginAttempt::forUser($user)->count();
+        $failedAttempts = $user ? LoginAttempt::forUser($user)->count() : 0;
 
         // Als gebruiker 3 of meer mislukte pogingen heeft → blokkeren
         if ($failedAttempts >= 3) {
