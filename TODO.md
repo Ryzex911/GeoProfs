@@ -40,6 +40,7 @@
 - [x] Unit tests: calculateDurationHours(), getUsedHours(), getRemainingForUser()
 - [x] Feature tests: ApiLeaveBalanceTest passes
 - [x] Integration: approve flow updates balance correctly
+- [x] Testplan: US007_Test_Plan.md met happy en unhappy path testgevallen
 
 ### H. Edge cases & extra regels
 - [x] Pro-rata startsaldo op basis van contract_fte en start_date

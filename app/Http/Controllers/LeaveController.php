@@ -29,7 +29,12 @@ class LeaveController extends Controller
     public function dashboard()
     {
         $leaveTypes = \App\Models\LeaveType::all();
-        return view('Requests.request-dashboard', compact('leaveTypes'));
+
+        // Verlofsaldo ophalen
+        $service = app(\App\Services\LeaveBalanceService::class);
+        $balance = $service->getRemainingForUser(auth()->user());
+
+        return view('Requests.request-dashboard', compact('leaveTypes', 'balance'));
     }
 
     // Opslaan via POST (AJAX of formulier)

@@ -106,7 +106,7 @@
             </div>
         </section>
 
-        <!-- 3) Saldo -->
+        <!-- 3) Verlodsaldo -->
         <aside class="card" aria-labelledby="sec-saldo">
             <div class="card__header"><h2 id="sec-saldo" class="card__title">Mijn verlofsaldo</h2></div>
             <div class="card__body">
@@ -114,10 +114,10 @@
                 <div class="kpi" style="text-align: center; margin-bottom: 24px;">
                     <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Resterend</div>
                     <div style="font-size: 2.5rem; font-weight: 700; color: #2563eb;">
-                        <span id="saldo-days">—</span> <span style="font-size: 1.2rem;">dagen</span>
+                        {{ number_format($balance['remaining_days'], 1) }} <span style="font-size: 1.2rem;">dagen</span>
                     </div>
                     <div style="font-size: 1rem; color: #666; margin-top: 4px;">
-                        (<span id="saldo-hours">—</span> uur)
+                        ({{ number_format($balance['remaining_hours'], 1) }} uur)
                     </div>
                 </div>
 
@@ -125,25 +125,27 @@
                 <div style="background: #f9fafb; padding: 12px; border-radius: 6px; font-size: 0.85rem;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
                         <span style="color: #666;">Startsaldo:</span>
-                        <strong id="saldo-start-display">— dagen</strong>
+                        <strong>{{ number_format($balance['start_days'], 1) }} dagen</strong>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
                         <span style="color: #666;">Gebruikt:</span>
-                        <strong id="saldo-used-display">— dagen</strong>
+                        <strong>{{ number_format($balance['used_days'], 1) }} dagen</strong>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: #666;">Resterend:</span>
-                        <strong style="color: #2563eb;" id="saldo-remaining-display">— dagen</strong>
+                        <strong style="color: #2563eb;">{{ number_format($balance['remaining_days'], 1) }} dagen</strong>
                     </div>
                 </div>
 
                 <!-- Waarschuwing (indien nodig) -->
-                <div id="saldo-warning" style="display: none; margin-top: 12px; padding: 10px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 0.85rem; color: #92400e;">
+                @if($balance['remaining_days'] < 3)
+                <div style="margin-top: 12px; padding: 10px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 0.85rem; color: #92400e;">
                     ⚠️ Je saldo is laag. Plan je verlof voorzichtig!
                 </div>
+                @endif
 
                 <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 12px; margin-bottom: 0;">
-                    Gegevens worden automatisch bijgewerkt. Volgende update: einde dag.
+                    Gegevens voor {{ $balance['year'] }}
                 </p>
             </div>
         </aside>
@@ -366,100 +368,7 @@
         renderRange();
     });
 
-    /* ========== SALDO LADEN ========== */
-    async function loadLeaveBalance() {
-        try {
-            const response = await fetch("{{ route('api.me.leave-balance') }}", {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                }
-            });
 
-            if (response.ok) {
-                const data = await response.json();
-
-                // Extract data from response
-                const remainingDays = parseFloat(data.data?.remaining_days || 0);
-                const usedDays = parseFloat(data.data?.used_days || 0);
-                const startDays = parseFloat(data.data?.start_days || 25);
-
-                // Resterend saldo (grote getal)
-                const saloDaysEl = document.getElementById('saldo-days');
-                if (saloDaysEl) {
-                    saloDaysEl.textContent = Math.round(remainingDays * 10) / 10;
-                }
-
-                // Gebruikte dagen
-                const usedDaysEl = document.getElementById('saldo-used');
-                if (usedDaysEl) {
-                    usedDaysEl.textContent = Math.round(usedDays * 10) / 10;
-                }
-
-                // Startsaldo
-                const startEl = document.getElementById('saldo-start');
-                const startDisplayEl = document.getElementById('saldo-start-display');
-                if (startEl) startEl.textContent = Math.round(startDays * 10) / 10;
-                if (startDisplayEl) startDisplayEl.textContent = (Math.round(startDays * 10) / 10) + ' dagen';
-
-                // Gebruikte dagen (detail)
-                const usedDisplayEl = document.getElementById('saldo-used-display');
-                if (usedDisplayEl) {
-                    usedDisplayEl.textContent = (Math.round(usedDays * 10) / 10) + ' dagen';
-                }
-
-                // Resterend (detail)
-                const remainingDisplayEl = document.getElementById('saldo-remaining-display');
-                if (remainingDisplayEl) {
-                    remainingDisplayEl.textContent = (Math.round(remainingDays * 10) / 10) + ' dagen';
-                }
-
-                // Progress Bar berekening
-                const percentage = startDays > 0 ? (usedDays / startDays) * 100 : 0;
-                const progressEl = document.getElementById('saldo-progress');
-                if (progressEl) {
-                    progressEl.style.width = Math.min(100, percentage) + '%';
-
-                    // Kleur aanpassen op basis van saldo
-                    if (percentage >= 90) {
-                        progressEl.style.background = '#dc2626'; // Rood
-                    } else if (percentage >= 75) {
-                        progressEl.style.background = '#f59e0b'; // Oranje
-                    } else if (percentage >= 50) {
-                        progressEl.style.background = '#3b82f6'; // Blauw
-                    } else {
-                        progressEl.style.background = '#10b981'; // Groen
-                    }
-                }
-
-                // Waarschuwing tonen als saldo laag is (< 3 dagen)
-                const warningEl = document.getElementById('saldo-warning');
-                if (warningEl) {
-                    if (remainingDays < 3) {
-                        warningEl.style.display = 'block';
-                    } else {
-                        warningEl.style.display = 'none';
-                    }
-                }
-            } else if (response.status === 401) {
-                console.error('Niet ingelogd.');
-                document.getElementById('saldo-days').textContent = 'N/A';
-                document.getElementById('saldo-used').textContent = 'N/A';
-            } else {
-                console.error('Saldo laden mislukt:', response.status);
-                document.getElementById('saldo-days').textContent = 'Fout';
-            }
-        } catch (error) {
-            console.error('Fout bij laden saldo:', error);
-            document.getElementById('saldo-days').textContent = 'Fout';
-        }
-    }
-
-    // Laad saldo bij pagina-laden
-    document.addEventListener('DOMContentLoaded', loadLeaveBalance);
-
-    // Ververs saldo om de 5 minuten
-    setInterval(loadLeaveBalance, 5 * 60 * 1000);
 </script>
 
 
