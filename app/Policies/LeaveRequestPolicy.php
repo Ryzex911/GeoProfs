@@ -8,18 +8,12 @@ use App\Models\User;
 class LeaveRequestPolicy
 {
     /**
-     * Manager board openen
+     * Determine whether the user can view any models.
      */
     public function leaveApprovePage(User $user): bool
     {
-        // ✅ Niet afhankelijk van active_role_id, maar echte rollen
-        return $user->hasRole(['admin', 'manager', 'projectleider']);
-        return $user->hasRole(['admin', 'manager', 'projectleider']);
+        return $user->activeRoleIs(['manager', 'projectleider']);
     }
-
-
-
-
 
 
     /**

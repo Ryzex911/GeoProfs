@@ -167,11 +167,6 @@ Route::get('/debug-role', function (RoleService $roleService) {
         return 'Niet ingelogd';
     }
 
-    $activeRoleId = $roleService->getActiveRoleId();
-    $activeRole = $roleService->getActiveRole($user);
 
-    dd([
-        \App\Models\LeaveType::where('name', \App\Models\LeaveType::REASON)->value('id')
 
-    ]);
 })->middleware('auth');

@@ -21,14 +21,12 @@ class UserPolicy
      */
     public function updateRoles(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->activeRoleIs('admin');
     }
-
 
     public function accessAdmin(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->activeRoleIs('admin');
     }
-
 
 }

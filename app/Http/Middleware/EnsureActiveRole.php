@@ -19,6 +19,7 @@ class EnsureActiveRole
             return $next($request);
         }
 
+
         if (auth()->check() && !session()->has('active_role_id')) {
             $firstRoleId = auth()->user()->roles()->pluck('roles.id')->first();
 
@@ -26,7 +27,6 @@ class EnsureActiveRole
                 session(['active_role_id' => (int)$firstRoleId]);
             }
         }
-
         return $next($request);
 
     }

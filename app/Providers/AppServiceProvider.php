@@ -29,31 +29,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // ✅ Admin mag alles (bypass policies)
-        Gate::before(function ($user, $ability) {
-            // Spatie laravel-permission
-            if (method_exists($user, 'hasRole') && $user->hasRole('admin')) {
-                return true;
-            }
-
-            // Als je géén Spatie gebruikt maar een kolom 'role' hebt, gebruik dit i.p.v. hierboven:
-            // if (($user->role ?? null) === 'admin') return true;
-
-            return null; // laat policies/gates beslissen voor niet-admins
-        });
-
         // ✅ Hou bestaande app boot zaken hier (observer/policies/rules)
-
-        // Observer
+        // Observer (als jullie die gebruiken)
         LeaveRequest::observe(LeaveRequestObserver::class);
 
-        // Password defaults
+        // (optioneel) Password defaults als jullie dat hadden
         Password::defaults(function () {
             return Password::min(8);
         });
 
-        // Vite prefetch
+        // (optioneel) Vite prefetch als jullie dat hadden
         Vite::prefetch(concurrency: 3);
+
+        // (optioneel) Gates/policies (laat staan als je ze gebruikt)
+        // Voorbeeld:
+        // Gate::define('viewAuditLogs', fn ($user) => $user->roles()->where('name', 'admin')->exists());
 
         // ✅ Audit auth/security event listeners
         $this->registerAuditEventListeners();

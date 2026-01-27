@@ -50,6 +50,9 @@ class UserController extends Controller
             $isCurrentAdmin = $user->hasRole('admin');
             $willLoseAdminRole = $adminRoleId && !in_array($adminRoleId, $roleIds);
 
+            $willLoseAdminRole = $adminRoleId && !in_array($adminRoleId, $roleIds); // check als admin niet in de lijst staat van de nieuwe rollen
+
+            // als de gebruiker admin is en de admin-rol wordt verwijderd >> blokkeer de actie
             if ($isCurrentAdmin && $willLoseAdminRole) {
 
                 // Audit: geblokkeerde poging

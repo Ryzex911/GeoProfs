@@ -64,7 +64,6 @@ class User extends Authenticatable
     public function activeRoleIs(string|array $roles): bool
     {
         $roleId = session('active_role_id');
-
         if (!$roleId) return false;
 
         $roles = is_array($roles) ? $roles : [$roles];
