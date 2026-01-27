@@ -1,0 +1,52 @@
+/* --- Layout fixes / overrides --- */
+
+/* Buttons should NOT be full width here */
+.card-2fa .btn { width: auto; display: inline-block; }
+
+/* Resend button stays full width under the row */
+.card-2fa .resend-form .btn { width: 100%; }
+
+/* Proper row layout: inputs + verify button, no overlap */
+.code-row{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;              /* wraps nicely on small widths */
+    margin-top: 14px;
+}
+
+/* Inputs in one line with spacing */
+.code-grid{
+    display: flex;
+    gap: 10px;
+    flex-wrap: nowrap;            /* keep them in a single row on desktop */
+}
+
+/* Nice, consistent boxes */
+.code-input{
+    width: 56px;
+    height: 56px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 600;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #f8fafc;
+    color:#0f172a;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.code-input:focus{
+    outline: none;
+    border-color:#0f3554;
+    box-shadow: 0 0 0 3px rgba(15,53,84,.15);
+    background:#fff;
+}
+
+/* Verify button behaves like a normal button */
+.verify-btn{ padding:.8rem 1.1rem; flex: 0 0 auto; }
+
+/* Mobile: stack verify under inputs */
+@media (max-width: 560px){
+    .code-row{ flex-direction: column; align-items: stretch; }
+    .verify-btn{ width:100%; }
+}
