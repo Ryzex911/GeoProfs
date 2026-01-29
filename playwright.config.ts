@@ -1,4 +1,7 @@
+import dotenv from 'dotenv';
 import { defineConfig, devices } from '@playwright/test';
+
+dotenv.config({ path: '.env.e2e' });
 
 export default defineConfig({
     testDir: './tests/e2e',
@@ -6,19 +9,17 @@ export default defineConfig({
     expect: { timeout: 10_000 },
 
     use: {
-        baseURL: 'http://127.0.0.1:8000',
+        baseURL: process.env.E2E_BASE_URL,
         trace: 'on-first-retry',
     },
 
-    // hou het even simpel: alleen chromium
     projects: [
         { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     ],
 
-    // start je Laravel app automatisch
     webServer: {
         command: 'php artisan serve --host=127.0.0.1 --port=8000',
-        url: 'http://127.0.0.1:8000',
+        url: process.env.E2E_BASE_URL,
         reuseExistingServer: true,
         timeout: 120_000,
     },

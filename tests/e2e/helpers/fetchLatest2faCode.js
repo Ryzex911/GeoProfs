@@ -44,7 +44,7 @@ export async function fetchLatest2faCode({ timeoutMs = 60000 } = {}) {
                 const subject = (header.subject || []).join(' ');
 
                 // Minimal filters: afzender = jijzelf of 'GeoProfs', subject bevat 'code' of '2FA'
-                if (!/geoprofs|ryzexgamer1@gmail\.com/i.test(from)) continue;
+                if (!/geoprofs|ledegreef07@gmail.com\.com/i.test(from)) continue;
                 if (!/code|2fa/i.test(subject)) continue;
 
                 const textPart = parts.find(p => p.which === 'TEXT');
@@ -69,3 +69,4 @@ export async function fetchLatest2faCode({ timeoutMs = 60000 } = {}) {
 }
 
 export default fetchLatest2faCode;
+
