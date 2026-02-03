@@ -33,11 +33,8 @@ class UserSeeder extends Seeder
         'email' => 'ledegreef07@gmail.com',
         'password' => Hash::make('12345678')
     ]);
-    
+
 }
 
-    public function run()
-    {
 
-    }
 }

@@ -20,7 +20,36 @@ async function fillOtpDInputs(page: any, otp: string) {
         if (el) el.value = value;
     }, otp);
 }
+async function loginWith2FA(page: any) {
+    const logPath = path.join(process.cwd(), "storage", "logs", "laravel.log");
 
+    let fromSize = 0;
+    try {
+        fromSize = (await fs.stat(logPath)).size;
+    } catch {
+        fromSize = 0;
+    }
+
+    await page.goto("/login");
+    await page.locator('input[name="email"]').fill(process.env.E2E_EMAIL!);
+    await page.locator('input[name="password"]').fill(process.env.E2E_PASSWORD!);
+    await page.locator('button[type="submit"]').first().click();
+
+    const d1 = page.locator('input[name="d1"]');
+
+    await Promise.race([
+        page.waitForURL(/dashboard/i, { timeout: 10_000 }).catch(() => null),
+        d1.waitFor({ state: "visible", timeout: 10_000 }).catch(() => null),
+    ]);
+
+    if (await d1.isVisible().catch(() => false)) {
+        const otp = await waitForOtpFromLaravelLog({ fromSize });
+        await fillOtpDInputs(page, otp);
+        await page.getByRole("button", { name: /verifiëren/i }).click();
+    }
+
+    await expect(page).toHaveURL(/dashboard/i);
+}
 test("E2E: login + email 2FA -> dashboard (and continue)", async ({ page }) => {
     const logPath = path.join(process.cwd(), "storage", "logs", "laravel.log");
 
@@ -71,5 +100,23 @@ test("E2E: login + email 2FA -> dashboard (and continue)", async ({ page }) => {
     // await page.locator('textarea[name="reason"]').fill("E2E test aanvraag");
     // await page.getByRole("button", { name: /aanvragen|indienen|submit/i }).click();
     // await expect(page.getByText(/succes|aangevraagd|opgeslagen/i)).toBeVisible();
+
 });
 
+test("manager keurt een aanvraag goed", async ({ page }) => {
+    await loginWith2FA(page);
+
+    await page.goto("/manager/requests");
+
+    const approveBtn = page
+        .locator('button:has-text("Goedkeuren")')
+        .first();
+
+    await expect(approveBtn).toBeVisible();
+
+    await approveBtn.click();
+
+    await expect(
+        page.getByText("Goedgekeurd")
+    ).toBeVisible({ timeout: 10000 });
+});
